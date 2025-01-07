@@ -10,11 +10,16 @@ app.use(express.json())
 
 const tokenRefresh=require('./Routes/RefreshToken/RefreshRoute')
 const adminAuth=require('./Routes/Admin/Auth/AuthRoute')
+const userAuth=require('./Routes/User/Auth/AuthRoute')
 
 
 app.use('/token',tokenRefresh)
 // admin routes
-app.use('/admin/auth',adminAuth)
+app.use('/admin/auth', adminAuth)
+
+
+// user routes
+app.use('/user/auth',userAuth)
 
 const PORT = 3006 || process.env.PORT
 app.listen(PORT,()=>{
