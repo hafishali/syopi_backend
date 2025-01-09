@@ -13,12 +13,17 @@ const adminAuth=require('./Routes/Admin/Auth/AuthRoute')
 const adminCategory=require('./Routes/Admin/Category/CategouryRoute')
 const userAuth=require('./Routes/User/Auth/AuthRoute')
 
+const CategoryRoutes = require('./Routes/Admin/Category/CategouryRoute');
+const SubcategoryRoutes = require('./Routes/Admin/SubCategory/SubCategoryRoute');
+
 
 
 app.use('/token',tokenRefresh)
 // admin routes
-app.use('/admin/auth',adminAuth)
-app.use('/admin/category',adminCategory)
+
+app.use('/admin/auth', adminAuth)
+app.use('/admin/category', CategoryRoutes);
+app.use('/admin/subcategory',SubcategoryRoutes);
 
 
 

@@ -7,12 +7,9 @@ const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const userType = req.body.userType; 
     const fileType = req.body.fileType; 
-
-
     if (!userType || !fileType) {
       return cb(new Error("UserType and FileType are required!"), false);
     }
-
     const folderPath = path.join(__dirname, "../uploads", userType, fileType);
 
     if (!fs.existsSync(folderPath)) {
