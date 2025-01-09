@@ -10,12 +10,16 @@ app.use(express.json())
 
 const tokenRefresh=require('./Routes/RefreshToken/RefreshRoute')
 const adminAuth=require('./Routes/Admin/Auth/AuthRoute')
+const adminCategory=require('./Routes/Admin/Category/CategouryRoute')
 
 
 app.use('/token',tokenRefresh)
 // admin routes
 app.use('/admin/auth',adminAuth)
+app.use('/admin/category',adminCategory)
 
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 const PORT = 3006 || process.env.PORT
 app.listen(PORT,()=>{
     console.log(`server started listening at PORT ${PORT}`);
