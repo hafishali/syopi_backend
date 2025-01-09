@@ -1,5 +1,5 @@
 const Category = require('../../../Models/Admin/CategoryModel')
-const fs = require('fs');
+const fs = require('fs');  
 
 // create a new category
 exports.createCategory = async (req, res) => {
@@ -17,7 +17,7 @@ exports.createCategory = async (req, res) => {
         } catch (err) {
             res.status(500).json({ message: 'Error creating category', error: err.message });
             
-        }
+        } 
     }
 
 

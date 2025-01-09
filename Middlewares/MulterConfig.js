@@ -5,7 +5,7 @@ const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const userType = req.body.userType; 
     const fileType = req.body.fileType; 
-
+ 
    
     const folderPath = path.join(__dirname, "../uploads", userType, fileType);
 
