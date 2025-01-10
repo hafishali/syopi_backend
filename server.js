@@ -13,7 +13,7 @@ const tokenRefresh=require('./Routes/RefreshToken/RefreshRoute')
 const adminAuth=require('./Routes/Admin/Auth/AuthRoute')
 const userAuth=require('./Routes/User/Auth/AuthRoute')
 const adminCoupon = require('./Routes/Admin/coupon/couponRoute')
-
+const offerRoutes = require('./Routes/Admin/offer/offerRoute')
 const CategoryRoutes = require('./Routes/Admin/Category/CategouryRoute');
 const SubcategoryRoutes = require('./Routes/Admin/SubCategory/SubCategoryRoute');
 
@@ -26,6 +26,7 @@ app.use('/admin/auth', adminAuth)
 app.use('/admin/coupon', adminCoupon)
 app.use('/admin/category', CategoryRoutes);
 app.use('/admin/subcategory',SubcategoryRoutes);
+app.use('/admin/offer', offerRoutes)
 
 
 
