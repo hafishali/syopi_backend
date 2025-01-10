@@ -1,5 +1,8 @@
 const Category = require('../../../Models/Admin/CategoryModel')
+
 const fs = require('fs');
+const path = require('path');
+
 
 // create a new category
 exports.createCategory = async (req, res) => {
@@ -17,7 +20,7 @@ exports.createCategory = async (req, res) => {
         } catch (err) {
             res.status(500).json({ message: 'Error creating category', error: err.message });
             
-        }
+        } 
     }
 
 
@@ -49,29 +52,35 @@ exports.getCategoryById = async (req, res)=> {
 }
 
 exports.updateCategory = async (req, res) => {
-        const { id } = req.params;
-        const { name,description, } = req.body;
-        try {
-            const category = await Category.findById(id);
-            if(!category) {
-                return res.status(404).json({ message: 'Category not found' });
-            }
-            if(name) category.name = name;
-            if(description) category.description = description;
-            if (req.file) {
-                const oldImagePath = `./uploads/category/${category.image};`
-                if (fs.existsSync(oldImagePath)) {
-                    fs.unlinkSync(oldImagePath);
-                }
-                category.image = req.file.filename;
-            }
-            await category.save();
-            res.status(200).json({ message: 'Category updated successfully', category });
-        } catch (err) {
-            res.status(500).json({ message: 'Error updating category', error: err.message });
+    const { id } = req.params;
+    const { name, description } = req.body;
+
+    try {
+        const category = await Category.findById(id);
+        if (!category) {
+            return res.status(404).json({ message: 'Category not found' });
         }
-        
+
+        // Update name and description if provided
+        if (name) category.name = name;
+        if (description) category.description = description;
+
+        // Update image if a new image is uploaded
+        if (req.file) {
+            const oldImagePath = path.join(__dirname, `../uploads/admin/category/${category.image}`);
+            if (fs.existsSync(oldImagePath)) {
+                fs.unlinkSync(oldImagePath); // Remove old image if exists
+            }
+            category.image = req.file.filename; // Update to new image filename
+        }
+
+        await category.save(); // Save the updated category
+        res.status(200).json({ message: 'Category updated successfully', category });
+    } catch (err) {
+        res.status(500).json({ message: 'Error updating category', error: err.message });
     }
+};
+
 exports.deleteCategory = async (req,res) => {
     const { id } = req.params;
 
