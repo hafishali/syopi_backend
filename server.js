@@ -25,17 +25,26 @@ app.use('/token',tokenRefresh)
 
 app.use('/admin/auth', adminAuth)
 <<<<<<< HEAD
+<<<<<<< HEAD
 app.use('/admin/coupon', adminCoupon)
 =======
+=======
+
+app.use('/admin/coupon', adminCoupon)
+>>>>>>> 367c68b29fda1c593976f73538097bc49941a24e
 app.use('/admin/category', CategoryRoutes);
 app.use('/admin/subcategory',SubcategoryRoutes);
 
 
+<<<<<<< HEAD
 >>>>>>> c45c3fc8db1c664a1324dffc7f91951fe3eda9ab
+=======
+>>>>>>> 367c68b29fda1c593976f73538097bc49941a24e
 
 // user routes
 app.use('/user/auth',userAuth)
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 scheduleCouponCron();
 
@@ -45,6 +54,15 @@ scheduleCouponCron();
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 >>>>>>> c45c3fc8db1c664a1324dffc7f91951fe3eda9ab
+=======
+
+scheduleCouponCron();
+
+
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
+
+>>>>>>> 367c68b29fda1c593976f73538097bc49941a24e
 const PORT = 3006 || process.env.PORT
 app.listen(PORT,()=>{
     console.log(`server started listening at PORT ${PORT}`);
