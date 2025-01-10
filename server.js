@@ -11,7 +11,6 @@ const { scheduleCouponCron } = require('./utils/cronTasks')
 
 const tokenRefresh=require('./Routes/RefreshToken/RefreshRoute')
 const adminAuth=require('./Routes/Admin/Auth/AuthRoute')
-const adminCategory=require('./Routes/Admin/Category/CategouryRoute')
 const userAuth=require('./Routes/User/Auth/AuthRoute')
 const adminCoupon = require('./Routes/Admin/coupon/couponRoute')
 
@@ -24,7 +23,6 @@ app.use('/token',tokenRefresh)
 // admin routes
 
 app.use('/admin/auth', adminAuth)
-
 app.use('/admin/coupon', adminCoupon)
 app.use('/admin/category', CategoryRoutes);
 app.use('/admin/subcategory',SubcategoryRoutes);
@@ -38,9 +36,8 @@ app.use('/user/auth',userAuth)
 scheduleCouponCron();
 
 
-
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
-
+ 
 const PORT = 3006 || process.env.PORT
 app.listen(PORT,()=>{
     console.log(`server started listening at PORT ${PORT}`);
