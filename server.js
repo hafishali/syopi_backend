@@ -15,6 +15,9 @@ const userAuth=require('./Routes/User/Auth/AuthRoute')
 
 const CategoryRoutes = require('./Routes/Admin/Category/CategouryRoute');
 const SubcategoryRoutes = require('./Routes/Admin/SubCategory/SubCategoryRoute');
+const SliderRoutes = require('./Routes/Admin/Slider/SliderRoute');
+const NotificationRoute = require('./Routes/Admin/Notification/NotificationRoute');
+const chappalRoute = require('./Routes/Admin/Product/ChappalRoute')
 
 
 
@@ -24,6 +27,10 @@ app.use('/token',tokenRefresh)
 app.use('/admin/auth', adminAuth)
 app.use('/admin/category', CategoryRoutes);
 app.use('/admin/subcategory',SubcategoryRoutes);
+app.use('/admin/slider',SliderRoutes);
+app.use('/admin/notification',NotificationRoute);
+app.use('/admin/chappal',chappalRoute);
+
 
 
 
