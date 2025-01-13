@@ -4,15 +4,12 @@ const fs = require('fs');
 //create a new subcategory 
 exports.createSubCategory = async (req,res) => {
     const { name,description,category } = req.body;
-    const {image}=req.file
 
-    console.log(image);
-
-    if(!image){
+    if(!req.file){
         return res.status(400).json({message: "SubCategory Image is required"})
     }
     try {
-        const newSubCategory = new SubCategory({name:name,category:category,image:image,description:description});
+        const newSubCategory = new SubCategory({name:name,category:category,image:req.file.filename,description:description});
         await newSubCategory.save();
         res.status(201).json({message: 'SubCategory created successfully', SubCategory: newSubCategory});
     } catch (error) {
@@ -50,7 +47,7 @@ exports.getSubCategoryById = async(req,res) => {
 
 exports.updateSubCategory = async (req,res) => {
     const { id } = req.params;
-    const { name,description,image,category } = req.body;
+    const { name,description,category } = req.body;
     try {
         const subCategory = await SubCategory.findById(id);
         if(!subCategory){
@@ -59,12 +56,12 @@ exports.updateSubCategory = async (req,res) => {
         if(name) subCategory.name = name;
         if(description) subCategory.description = description;
         if(category) subCategory.category = category;
-        if(image){
+        if(req.file){
             const oldImagePath = `./uploads/subcategory/${subCategory.image}`
             if(fs.existsSync(oldImagePath)) {
                 fs.unlinkSync(oldImagePath)
             }
-            subCategory.image = image;
+            subCategory.image = req.file.filename;
         }
         await subCategory.save();
         res.status(200).json({ message: 'SubCategory updated successfully', subCategory });
@@ -91,7 +88,7 @@ exports.deleteSubCategory = async (req,res) => {
         await SubCategory.findByIdAndDelete(id);
         res.status(200).json({ message: 'SubCategory deleted successfully' });
     } catch (err) {
-        res.status(500).json({ message: 'Error deleting category', error: err.message });
+        res.status(500).json({ message: 'Error deleting chappal', error: err.message });
     }
 }
 
