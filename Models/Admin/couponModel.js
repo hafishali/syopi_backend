@@ -10,6 +10,11 @@ const couponSchema = new mongoose.Schema({
   applicableCategories: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Category' }],
 //   applicableSubcategories: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Subcategory' }],
 //   applicableProducts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
+createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Admin',  // Reference to the Admin model
+      required: true,
+    },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Coupon', couponSchema);
