@@ -9,19 +9,20 @@ const chappalSchema = new mongoose.Schema({
     type: [String],
     required: [true, "At least one chappal image is required"]
   },
-//   category: {
-//     type: String,
-//     required: [true, "category is required"],
-//   },
+  category: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Category",
+    required: true
+  },
   description: {
     type: String,
     required: [true, "description is required"],
   },
-//   subcategory: {
-//     type: mongoose.Schema.Types.ObjectId,
-//     ref: "SubCategory",
-//     required: true,
-//   },
+  subcategory: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "SubCategory",
+    required: true,
+  },
   brand: {
     type: String,
     required: [ true, 'brand is required' ]
