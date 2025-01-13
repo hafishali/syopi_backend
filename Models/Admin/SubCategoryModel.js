@@ -3,18 +3,18 @@ const mongoose = require("mongoose");
 const subCategorySchema = new mongoose.Schema({
   name: {
     type: String,
-    require: [true, "Name is required"],
+    required: [true, "Name is required"],
     unique: true,
     index: true,
   },
   category: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Category",
-    require: true,
+    required: true,
   },
   image: {
     type: String,
-    require: true,
+    required: true,
   },
   description: {
     type: String,

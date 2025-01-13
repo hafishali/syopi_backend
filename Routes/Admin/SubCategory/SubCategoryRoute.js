@@ -8,10 +8,10 @@ const multerConfig = require('../../../Middlewares/MulterConfig');
 router.post('/create',verifyToken(['admin']),multerConfig.single('image'),subCategoryController.createSubCategory);
 
 // get all subcategories
-router.get('/get',subCategoryController.getSubCategories);
+router.get('/get',verifyToken(['admin']),subCategoryController.getSubCategories);
 
 // get a subcategory by id
-router.get('/get/:id',subCategoryController.getSubCategoryById);
+router.get('/get/:id',verifyToken(['admin']),subCategoryController.getSubCategoryById);
 
 // update subcategory
 router.patch('/update/:id',verifyToken(['admin']),multerConfig.single('image'),subCategoryController.updateSubCategory);
@@ -20,6 +20,6 @@ router.patch('/update/:id',verifyToken(['admin']),multerConfig.single('image'),s
 router.delete('/delete/:id',verifyToken(['admin']),subCategoryController.deleteSubCategory);
 
 // search subcategory
-router.get('/search',subCategoryController.searchSubCategory);
+router.get('/search',verifyToken(['admin']),subCategoryController.searchSubCategory);
 
 module.exports = router; 
