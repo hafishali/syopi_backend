@@ -4,6 +4,7 @@ const path = require('path');
 
 //create new chappal
 exports.createChappal = async(req,res) => {
+    const { sizes,colours } = req.body;
     if(!req.files){
         return res.status(400).json({message: "At least one chappal image is required"})
     }
@@ -12,6 +13,8 @@ exports.createChappal = async(req,res) => {
 
         const newChappal = new Chappal({
             ...req.body,
+            sizes: JSON.parse(sizes),
+            colours: JSON.parse(colours),
             images: imagePaths
         });
         await newChappal.save();
@@ -35,7 +38,7 @@ exports.getChappals = async(req,res) => {
 exports.getChappalById = async(req,res) => {
     const { id } = req.params;
     try {
-        const chappal = await Chappal.findById(id);
+        const chappal = await Chappal.findById(id).populate('category subcategory');
         if(!chappal){
             return res.status(404).json({ message: "chappal not found" });
         }
@@ -108,5 +111,32 @@ exports.deleteChappal = async(req,res) => {
         res.status(200).json({ message: 'chappal deleted successfully' });
     } catch (err) {
         res.status(500).json({ message: 'Error deleting chappal', error: err.message });
+    }
+}
+
+// delete a specific image by name
+exports.deleteChappalImage = async (req,res) =>{
+    try {
+        const { id } = req.params;
+        const { imageName } = req.body;
+        const chappal = await Chappal.findById(id);
+        if(!chappal){
+            return res.status(404).json({ message: "Chappal not found" });
+        }
+        const imgExists = chappal.images.filter((img) => {
+            const imgFileName = img.split("\\").pop().split("/").pop();
+            return imgFileName === imageName;
+        })
+        if(!imgExists){
+            return res.status(400).json({ message: "Image not found in Chappal" });
+        }
+         // Use $pull to remove the image directly in the database
+        const updatedChappal = await Chappal.findByIdAndUpdate(
+        id,
+        { $pull: { images: { $regex: new RegExp(imageName, "i") } } },
+        { new: true });
+        res.status(200).json({ message: "Image deleted successfully", images: updatedChappal.images });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
 }
