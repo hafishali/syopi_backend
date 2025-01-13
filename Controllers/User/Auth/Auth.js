@@ -26,8 +26,9 @@ exports.registerUser = async (req, res) => {
       });
   
       if (referrer) {
-        console.log(`Referral successful! Referrer: ${referrer.email}`);
-      }
+        console.log(
+          `Referral successful! Referrer: ${referrer.email || referrer.phone || 'Unknown contact info'}`
+        );      }
     } catch (error) {
       res.status(500).json({ message: 'Server error', error: error.message });
     }
@@ -56,7 +57,7 @@ exports.loginUser = async (req, res) => {
   
       res.status(200).json({
         message: 'User logged in successfully',
-        user: { name: user.name, email: user.email, phone: user.phone, role: user.role },
+        user: { name: user._id, name: user.name, email: user.email, phone: user.phone, role: user.role },
         accessToken,
         refreshToken,
       });
