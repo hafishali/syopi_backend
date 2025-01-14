@@ -5,23 +5,23 @@ const fs = require("fs");
 // Multer Storage Configuration
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const userType = req.body.userType; 
-    const fileType = req.body.fileType; 
+    const userType = req.body.userType || 'defaultUser'; 
+    const fileType = req.body.fileType || 'defaultfile'; 
     if (!userType || !fileType) {
       return cb(new Error("UserType and FileType are required!"), false);
     }
     const folderPath = path.join(__dirname, "../uploads", userType, fileType);
 
     if (!fs.existsSync(folderPath)) {
-      fs.mkdirSync(folderPath, { recursive: true });
+      fs.mkdirSync(folderPath, { recursive: true });   
     }
 
     cb(null, folderPath); // Callback with the folder path
   },
-  filename: (req, file, callback) => {
+  filename: (req, file, callback) => { 
     const filename = `image-${Date.now()}-${file.originalname}`;
-    callback(null, filename);
-  },
+    callback(null, filename);  
+  }, 
 });
 
 // Filter for valid image types
@@ -42,3 +42,4 @@ const upload = multer({
 });
 
 module.exports = upload;
+ 
