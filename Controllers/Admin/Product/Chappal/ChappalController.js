@@ -216,7 +216,7 @@ exports.updateChappal = async (req, res) => {
         "details.colours": parsedColours,
       };
   
-      // Update the product
+      // Update product
       const updatedProduct = await Product.findByIdAndUpdate(id, updatedData, { new: true });
   
       res.status(200).json({ message: "Chappal updated successfully", product: updatedProduct });
