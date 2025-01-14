@@ -31,7 +31,7 @@ app.use('/admin/category', CategoryRoutes);
 app.use('/admin/subcategory',SubcategoryRoutes);
 app.use('/admin/slider',SliderRoutes);
 app.use('/admin/notification',NotificationRoute);
-app.use('/admin/chappal',chappalRoute);
+app.use('/admin/product/chappal',chappalRoute);
 app.use('/admin/offer', offerRoutes)
 
 
