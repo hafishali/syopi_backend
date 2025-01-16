@@ -34,9 +34,21 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: [true, 'Password is required'],
+      required: false, // Default to false
       minlength: [6, 'Password must be at least 6 characters long'],
+      validate: {
+        validator: function (value) {
+          // Ensure password is present if googleId is missing
+          if (!this.googleId && (!value || value.length < 6)) {
+            return false;
+          }
+          return true;
+        },
+        message: 'Password is required and must be at least 6 characters long unless Google login is used.',
+      },
     },
+
+
     referralCode: {
       type: String,
       unique: true,
@@ -69,4 +81,3 @@ userSchema.pre('save', async function (next) {
 });
 
 module.exports = mongoose.model('User', userSchema);
- 

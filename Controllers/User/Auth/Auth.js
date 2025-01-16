@@ -1,6 +1,8 @@
 const User = require('../../../Models/User/UserModel');
 const bcrypt = require('bcrypt');
 const { generateAccessToken, generateRefreshToken } = require('../../../utils/tokenUtils');
+const jwt = require('jsonwebtoken');
+const passport = require('passport');
 
 // Register User
 exports.registerUser = async (req, res) => {
@@ -66,3 +68,39 @@ exports.loginUser = async (req, res) => {
     }
   };
   
+// Google Login Callback
+exports.googleLoginCallback = (req, res, next) => {
+  passport.authenticate('google', { session: false }, async (err, user, info) => {
+      if (err) {
+          return res.status(500).json({ message: 'Authentication failed', error: err.message });
+      }
+      try {
+          // Check if a user with this email exists
+          const existingUser = await User.findOne({ email: user.email });
+          if (existingUser) {
+              user = existingUser; // Link to existing user
+          } else {
+              // Create a new user if not found
+              user = await User.create({
+                  name: user.name,
+                  email: user.email,
+                  googleId: user.id,
+              });
+          }
+          // Generate JWT token
+          const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1d' });
+          res.status(200).json({
+              message: 'Google login successful',
+              token,
+              user: {
+                  name: user.name,
+                  email: user.email,
+                  role: user.role,
+              },
+          });
+      } catch (error) {
+        console.log(err)
+          res.status(500).json({ message: 'Server error', error: error.message });
+      }
+  })(req, res, next);
+};
