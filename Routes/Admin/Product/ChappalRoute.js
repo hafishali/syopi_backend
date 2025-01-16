@@ -22,6 +22,6 @@ router.patch('/update/:id',verifyToken(['admin']),upload,chappalController.updat
 router.delete('/delete/:id',verifyToken(['admin']),chappalController.deleteChappal);
 
 // delete a image
-router.delete('/delete-chappal-image/:id',verifyToken(['admin']),chappalController.deleteChappalImage);
-
-module.exports = router;
+// router.delete('/delete-chappal-image/:id',verifyToken(['admin']),chappalController.deleteChappalImage);
+ 
+module.exports = router;  

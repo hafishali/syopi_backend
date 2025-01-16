@@ -5,6 +5,11 @@ const productSchema = new mongoose.Schema({
     type: String,
     required: [true, "product name is required"],
   },
+  productType: {
+    type: String,
+    required: [true, "Product type is required"],
+    enum: ["Dress","Chappal"]
+  },
   images: {
     type: [String],
     required: [true, "At least one product image is required"]

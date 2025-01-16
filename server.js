@@ -19,7 +19,7 @@ const SubcategoryRoutes = require('./Routes/Admin/SubCategory/SubCategoryRoute')
 const SliderRoutes = require('./Routes/Admin/Slider/SliderRoute');
 const NotificationRoute = require('./Routes/Admin/Notification/NotificationRoute');
 const chappalRoute = require('./Routes/Admin/Product/ChappalRoute')
-
+const dressRoute = require('./Routes/Admin/Product/DressRoute')
 
 
 app.use('/token',tokenRefresh)
@@ -32,6 +32,7 @@ app.use('/admin/subcategory',SubcategoryRoutes);
 app.use('/admin/slider',SliderRoutes);
 app.use('/admin/notification',NotificationRoute);
 app.use('/admin/product/chappal',chappalRoute);
+app.use('/admin/product/dress',dressRoute);
 app.use('/admin/offer', offerRoutes)
 
 
