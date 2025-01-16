@@ -8,7 +8,7 @@ exports.createCoupon = async (req, res) => {
     const {
       code, type, value, startDate, endDate,
       applicableCategories, 
-    //   applicableSubcategories, applicableProducts,
+      applicableSubcategories, applicableProducts,
     } = req.body;
   
     try {
@@ -25,8 +25,8 @@ exports.createCoupon = async (req, res) => {
         startDate,
         endDate,
         applicableCategories,
-        // applicableSubcategories,
-        // applicableProducts,
+        applicableSubcategories,
+        applicableProducts,
         createdBy: admin._id,
       });
   
@@ -43,8 +43,8 @@ exports.createCoupon = async (req, res) => {
     try {
       const coupons = await Coupon.find()
         .populate('applicableCategories', 'name')
-        // .populate('applicableSubcategories', 'name')
-        // .populate('applicableProducts', 'name')
+        .populate('applicableSubcategories', 'name')
+        .populate('applicableProducts', 'name')
         .populate('createdBy', 'role')
         .sort({ createdAt: -1 });
   
@@ -62,8 +62,8 @@ exports.createCoupon = async (req, res) => {
     try {
       const coupon = await Coupon.findById(id)
         .populate('applicableCategories', 'name')
-        // .populate('applicableSubcategories', 'name')
-        // .populate('applicableProducts', 'name');
+        .populate('applicableSubcategories', 'name')
+        .populate('applicableProducts', 'name')
         .populate('createdBy', 'role')
   
       if (!coupon) {
@@ -82,7 +82,7 @@ exports.createCoupon = async (req, res) => {
     const {
       code, type, value, startDate, endDate,
       applicableCategories, 
-    //   applicableSubcategories, applicableProducts,
+      applicableSubcategories, applicableProducts,
     } = req.body;
   
     try {
@@ -98,8 +98,8 @@ exports.createCoupon = async (req, res) => {
       if (startDate) coupon.startDate = startDate;
       if (endDate) coupon.endDate = endDate;
       if (applicableCategories) coupon.applicableCategories = applicableCategories;
-    //   if (applicableSubcategories) coupon.applicableSubcategories = applicableSubcategories;
-    //   if (applicableProducts) coupon.applicableProducts = applicableProducts;
+      if (applicableSubcategories) coupon.applicableSubcategories = applicableSubcategories;
+      if (applicableProducts) coupon.applicableProducts = applicableProducts;
   
       await coupon.save();
       res.status(200).json({ message: 'Coupon updated successfully', coupon });
