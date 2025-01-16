@@ -24,4 +24,5 @@ router.delete('/delete/:id',verifyToken(['admin']),chappalController.deleteChapp
 // delete a image
 // router.delete('/delete-chappal-image/:id',verifyToken(['admin']),chappalController.deleteChappalImage);
 
-module.exports = router;
+ 
+module.exports = router;  
