@@ -7,7 +7,9 @@ const path = require('path')
 const app = express()
 app.use(cors())
 app.use(express.json())
+
 const { scheduleCouponCron } = require('./utils/cronTasks')
+require('./Configs/passportConfigGoogle')
 
 const tokenRefresh=require('./Routes/RefreshToken/RefreshRoute')
 const adminAuth=require('./Routes/Admin/Auth/AuthRoute')
@@ -19,10 +21,14 @@ const SubcategoryRoutes = require('./Routes/Admin/SubCategory/SubCategoryRoute')
 const SliderRoutes = require('./Routes/Admin/Slider/SliderRoute');
 const NotificationRoute = require('./Routes/Admin/Notification/NotificationRoute');
 const chappalRoute = require('./Routes/Admin/Product/ChappalRoute')
+const UserCategories=require('./Routes/User/Category/CategoryRoute')
+const UserSubCategories=require('./Routes/User/SubCategory/SubCategoryRoute')
+
 
 
 
 app.use('/token',tokenRefresh)
+app.use(passport.initialize())
 // admin routes
 
 app.use('/admin/auth', adminAuth)
@@ -39,6 +45,8 @@ app.use('/admin/offer', offerRoutes)
 
 // user routes
 app.use('/user/auth',userAuth)
+app.use('/user/categories',UserCategories)
+app.use('/user/Subcategories',UserSubCategories)
 
 
 scheduleCouponCron();
