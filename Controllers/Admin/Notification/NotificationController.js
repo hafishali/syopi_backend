@@ -3,7 +3,7 @@ const fs = require('fs');
 
 //create new notification
 exports.createNotification = async (req,res) => {
-    const { title,description,datetime } = req.body;
+    const { title,description } = req.body;
 
     if(!req.file){
         return res.status(400).json({ message: "Notification Image is required" })
@@ -14,8 +14,10 @@ exports.createNotification = async (req,res) => {
             title,
             image: req.file.filename,
             description,
-            datetime: new Date(datetime)
+            ownerId: req.user.id,
+            role: req.user.role === "admin" ? "Admin": "Vendor",
         })
+        console.log(newNotification);
         await newNotification.save();
         res.status(201).json({ message: 'Notification created successfully', notification:newNotification })
     } catch (err) {
@@ -41,7 +43,7 @@ exports.getNotificationById = async (req,res) => {
     const { id } = req.params;
 
     try {
-        const notification = await Notification.findById(id);
+        const notification = await Notification.findById(id).populate("ownerId");
         if(!notification){
             return res.status(404).json({ message: "Notification not found" })
         }

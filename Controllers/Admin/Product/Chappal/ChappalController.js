@@ -15,6 +15,7 @@ exports.createChappal = async (req, res) => {
   
       const {
         name,
+        productType,
         description,
         brand,
         wholesalePrice,
@@ -59,6 +60,7 @@ exports.createChappal = async (req, res) => {
   
       const newProduct = new Product({
         name,
+        productType,
         images: imagePaths,
         category,
         description,
@@ -78,7 +80,7 @@ exports.createChappal = async (req, res) => {
           type,
         },
         date: date ? new Date(date) : new Date(), 
-        owner,
+        owner, 
         ownerType,
       });
 
@@ -107,9 +109,39 @@ exports.createChappal = async (req, res) => {
     }
   };
   
-
-// Get all chappals
+// get all chappals
 exports.getChappals = async (req, res) => {
+  try {
+    const { page = 1, limit = 10, ownerType, productType } = req.query;
+
+    const query = {};
+    if (ownerType) query.ownerType = ownerType; // Filter by Admin or Vendor
+    if (productType) query.productType = productType; // Filter by product type
+
+    const products = await Product.find(query)
+      .skip((page - 1) * limit)
+      .limit(Number(limit))
+      .sort({ createdAt: -1 });
+
+    const totalCount = await Product.countDocuments(query);
+
+    res.status(200).json({
+      message: "Products fetched successfully",
+      products,
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(totalCount / limit),
+        totalItems: totalCount,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching products", error: err.message });
+  }
+};
+
+
+// Get all products
+exports.getAllProducts = async (req, res) => {
     try {
       const { page = 1, limit = 10, brand, type, subcategory, category } = req.query;
   
