@@ -1,4 +1,4 @@
-const Product = require('../../../../Models/Product/productModel');
+const Product = require('../../../../Models/Admin/productModel');
 const Category = require('../../../../Models/Admin/CategoryModel')
 const fs = require('fs');
 const path = require('path');
@@ -162,7 +162,7 @@ exports.getAllProducts = async (req, res) => {
       const totalCount = await Product.countDocuments(query);
   
       res.status(200).json({
-        message: "Chappals fetched successfully",
+        message: "products fetched successfully",
         products,
         pagination: {
           currentPage: page,

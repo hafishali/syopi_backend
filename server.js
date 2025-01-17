@@ -31,6 +31,7 @@ const vendorSliderRoute = require('./Routes/Vendor/Slider/SliderRoute');
 const dressRoute = require('./Routes/Admin/Product/DressRoute')
 const UserCategories=require('./Routes/User/Category/CategoryRoute')
 const UserSubCategories=require('./Routes/User/SubCategory/SubCategoryRoute')
+const userProducts=require('./Routes/User/Products/Products')
 
 
 
@@ -67,6 +68,7 @@ app.use('/vendor/slider', vendorSliderRoute);
 app.use('/user/auth',userAuth)
 app.use('/user/categories',UserCategories)
 app.use('/user/Subcategories',UserSubCategories)
+app.use('/user/Products',userProducts)
 
 
 scheduleCouponCron();
