@@ -1,4 +1,4 @@
-const Product = require('../../../../Models/Product/productModel');
+const Product = require('../../../../Models/Admin/productModel');
 const Category = require('../../../../Models/Admin/CategoryModel')
 const fs = require('fs');
 const path = require('path');
@@ -113,12 +113,14 @@ exports.createChappal = async (req, res) => {
 // get all chappals
 exports.getChappals = async (req, res) => {
   try {
-    const { page = 1, limit = 10, ownerType, productType } = req.query;
+    const { page = 1, limit = 10, ownerType } = req.query;
 
-    const query = {};
-    if (ownerType) query.ownerType = ownerType; // Filter by Admin or Vendor
-    if (productType) query.productType = productType; // Filter by product type
+    const query = { productType: "Chappal" }; 
 
+    // Optionally filter by ownerType (e.g., Admin or Vendor)
+    if (ownerType) query.ownerType = ownerType;
+
+    // Fetch products with pagination
     const products = await Product.find(query)
       .skip((page - 1) * limit)
       .limit(Number(limit))
@@ -127,7 +129,7 @@ exports.getChappals = async (req, res) => {
     const totalCount = await Product.countDocuments(query);
 
     res.status(200).json({
-      message: "Products fetched successfully",
+      message: "Chappal fetched successfully",
       products,
       pagination: {
         currentPage: page,
