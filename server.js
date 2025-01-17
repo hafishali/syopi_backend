@@ -23,6 +23,7 @@ const NotificationRoute = require('./Routes/Admin/Notification/NotificationRoute
 const chappalRoute = require('./Routes/Admin/Product/ChappalRoute')
 const UserCategories=require('./Routes/User/Category/CategoryRoute')
 const UserSubCategories=require('./Routes/User/SubCategory/SubCategoryRoute')
+const userProducts=require('./Routes/User/Products/Products')
 
 
 
@@ -47,6 +48,7 @@ app.use('/admin/offer', offerRoutes)
 app.use('/user/auth',userAuth)
 app.use('/user/categories',UserCategories)
 app.use('/user/Subcategories',UserSubCategories)
+app.use('/user/Products',userProducts)
 
 
 scheduleCouponCron();
