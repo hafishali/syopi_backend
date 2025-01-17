@@ -3,10 +3,14 @@ const fs = require('fs');
 
 // create slider
 exports.createslider = async (req,res) => {
-    const { title,link,category,date } = req.body;
+    const { title,link,category } = req.body;
 
     if(!req.file){
         return res.status(400).json({ message: "Please upload a image" });
+    }
+    let role;
+    if(req.user.role === "admin"){
+        role = "Admin"
     }
 
     try {
@@ -15,7 +19,8 @@ exports.createslider = async (req,res) => {
             link,
             category,
             image: req.file.filename,
-            date
+            ownerId: req.user.id,
+            role
         })
         await newSlider.save();
         res.status(201).json({ message: "Slider created successfully", newSlider });
@@ -52,7 +57,7 @@ exports.getSliderById = async(req,res) => {
 exports.updateSlider = async (req,res) => {
     const { id } = req.params;
 
-    const { title,link,category,isActive,date } =req.body;
+    const { title,link,category,isActive } =req.body;
 
     try {
         const slider = await Slider.findById(id);
@@ -64,7 +69,6 @@ exports.updateSlider = async (req,res) => {
         if(link) slider.link = link;
         if(category) slider.category = category;
         if(isActive !== undefined) slider.isActive = isActive;
-        if(date) slider.date = date;
 
         if(req.file){
             const oldImagePath = `./uploads/category/${slider.image}`;
