@@ -1,16 +1,23 @@
 const Coupon = require('../../../Models/Admin/couponModel')
 const Category = require('../../../Models/Admin/CategoryModel')
 const validateCouponLogic = require('../../../utils/validateCoupon');
+const Admin = require('../../../Models/Admin/AdminModel')
 // create coupon
 
 exports.createCoupon = async (req, res) => {
     const {
       code, type, value, startDate, endDate,
       applicableCategories, 
-    //   applicableSubcategories, applicableProducts,
+      applicableSubcategories, applicableProducts,
     } = req.body;
   
     try {
+
+      const admin = await Admin.findById(req.user.id);
+          if (!admin) {
+            return res.status(403).json({ message: 'Only admins can create offers.' });
+          }
+
       const newCoupon = new Coupon({
         code,
         type,
@@ -18,8 +25,9 @@ exports.createCoupon = async (req, res) => {
         startDate,
         endDate,
         applicableCategories,
-        // applicableSubcategories,
-        // applicableProducts,
+        applicableSubcategories,
+        applicableProducts,
+        createdBy: admin._id,
       });
   
       await newCoupon.save();
@@ -35,8 +43,9 @@ exports.createCoupon = async (req, res) => {
     try {
       const coupons = await Coupon.find()
         .populate('applicableCategories', 'name')
-        // .populate('applicableSubcategories', 'name')
-        // .populate('applicableProducts', 'name')
+        .populate('applicableSubcategories', 'name')
+        .populate('applicableProducts', 'name')
+        .populate('createdBy', 'role')
         .sort({ createdAt: -1 });
   
       res.status(200).json(coupons);
@@ -53,8 +62,9 @@ exports.createCoupon = async (req, res) => {
     try {
       const coupon = await Coupon.findById(id)
         .populate('applicableCategories', 'name')
-        // .populate('applicableSubcategories', 'name')
-        // .populate('applicableProducts', 'name');
+        .populate('applicableSubcategories', 'name')
+        .populate('applicableProducts', 'name')
+        .populate('createdBy', 'role')
   
       if (!coupon) {
         return res.status(404).json({ message: 'Coupon not found' });
@@ -72,7 +82,7 @@ exports.createCoupon = async (req, res) => {
     const {
       code, type, value, startDate, endDate,
       applicableCategories, 
-    //   applicableSubcategories, applicableProducts,
+      applicableSubcategories, applicableProducts,
     } = req.body;
   
     try {
@@ -88,8 +98,8 @@ exports.createCoupon = async (req, res) => {
       if (startDate) coupon.startDate = startDate;
       if (endDate) coupon.endDate = endDate;
       if (applicableCategories) coupon.applicableCategories = applicableCategories;
-    //   if (applicableSubcategories) coupon.applicableSubcategories = applicableSubcategories;
-    //   if (applicableProducts) coupon.applicableProducts = applicableProducts;
+      if (applicableSubcategories) coupon.applicableSubcategories = applicableSubcategories;
+      if (applicableProducts) coupon.applicableProducts = applicableProducts;
   
       await coupon.save();
       res.status(200).json({ message: 'Coupon updated successfully', coupon });
