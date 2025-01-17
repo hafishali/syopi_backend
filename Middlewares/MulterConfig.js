@@ -10,7 +10,7 @@ const storage = multer.diskStorage({
     if (!userType || !fileType) {
       return cb(new Error("UserType and FileType are required!"), false);
     }
-    const folderPath = path.join(__dirname, "../uploads", userType, fileType);
+    const folderPath = path.join(__dirname, "../uploads");
 
     if (!fs.existsSync(folderPath)) {
       fs.mkdirSync(folderPath, { recursive: true });   
