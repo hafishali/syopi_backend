@@ -5,6 +5,7 @@ const path = require('path');
 const subCategory = require('../../../../Models/Admin/SubCategoryModel');
 const Admin = require('../../../../Models/Admin/AdminModel')
 
+
 // Create a new chappal
 exports.createChappal = async (req, res) => {
     try {
@@ -31,7 +32,7 @@ exports.createChappal = async (req, res) => {
         category,
         subcategory,
         owner,
-      } = req.body;
+      } = req.body; 
 
       // Determine ownerType based on the owner ID
     
