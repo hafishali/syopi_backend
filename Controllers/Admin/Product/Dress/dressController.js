@@ -138,32 +138,36 @@ exports.getAllProduct = async (req, res) => {
 //get all dress
 exports.getDresses = async (req, res) => {
     try {
-      const { page = 1, limit = 10, ownerType, productType } = req.query;
+      const { page = 1, limit = 10, ownerType } = req.query;
   
-      const query = {};
-      if (ownerType) query.ownerType = ownerType; // Filter by Admin or Vendor
-      if (productType) query.productType = productType; // Filter by product type
+      // Explicitly filter for productType "Dress"
+      const query = { productType: "Dress" }; 
   
+      // Optionally filter by ownerType (e.g., Admin or Vendor)
+      if (ownerType) query.ownerType = ownerType;
+  
+      // Fetch products with pagination
       const products = await Product.find(query)
         .skip((page - 1) * limit)
         .limit(Number(limit))
-        .sort({ createdAt: -1 }); 
+        .sort({ createdAt: -1 });
   
       const totalCount = await Product.countDocuments(query);
   
       res.status(200).json({
-        message: "Products fetched successfully",
+        message: "Dresses fetched successfully",
         products,
         pagination: {
-          currentPage: page,
+          currentPage: Number(page),
           totalPages: Math.ceil(totalCount / limit),
           totalItems: totalCount,
         },
       });
     } catch (err) {
-      res.status(500).json({ message: "Error fetching products", error: err.message });
+      res.status(500).json({ message: "Error fetching dresses", error: err.message });
     }
   };
+  
   
 
 // Get a single dress by ID
