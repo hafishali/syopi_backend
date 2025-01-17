@@ -5,6 +5,15 @@ const notificationSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    role: {
+        type: String,
+        required: true,
+    },
+    ownerId: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        refPath: 'role'
+    },
     image: {
         type:String
     },
@@ -12,11 +21,7 @@ const notificationSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    datetime: {
-        type: Date,
-        required: true
-    },
-},{ timestamps: true })
+},{ timestamps: true });
 
 const Notification = mongoose.model('Notification',notificationSchema);
 

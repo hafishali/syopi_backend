@@ -5,6 +5,15 @@ const sliderSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    role: {
+        type: String,
+        required: true
+    },
+    ownerId: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: 'role'
+    },
     image: {
         type: String,
         required: true,
@@ -25,10 +34,6 @@ const sliderSchema = new mongoose.Schema({
     isActive: {
         type: Boolean,
         default: true,
-    },
-    date: {
-        type: Date,
-        required: true,
     }
 },{ timestamps: true });
 
