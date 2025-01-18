@@ -2,7 +2,7 @@ const Product = require('../../../../Models/Admin/productModel');
 const Category = require('../../../../Models/Admin/CategoryModel');
 const subCategory = require('../../../../Models/Admin/SubCategoryModel');
 const Admin = require('../../../../Models/Admin/AdminModel');
-// const Vendor = require('../../../../Models/Vendor/VendorModel');
+const Vendor = require('../../../../Models/Admin/VendorModel');
 const fs = require('fs');
 const path = require('path');
 
@@ -40,7 +40,7 @@ exports.createDress = async (req, res) => {
     } else {
       const vendor = await Vendor.findById(owner);
       if (vendor) {
-        ownerType = vendor.role || "Vendor";
+        ownerType = vendor.role || "vendor";
       } else {
         return res.status(400).json({ message: "Invalid owner ID" });
       }
@@ -203,39 +203,50 @@ exports.getDressById = async (req, res) => {
 
 // Update a dress
 exports.updateDress = async (req, res) => {
-  const { id } = req.params;
+    const { id } = req.params;
+  
+    try {
+      // Find the product by ID
+      const product = await Product.findById(id);
+  
+      if (!product) {
+        return res.status(404).json({ message: "Dress not found" });
+      }
+  
+      // Handle images
+      const existingImages = product.images;
+      const newImages = req.files ? req.files.map((file) => file.filename) : [];
+  
+      if (existingImages.length + newImages.length > 5) {
+        return res.status(400).json({ message: "Cannot have more than 5 images for a dress" });
+      }
+  
+      // Parse sizes and colors from request body (if provided)
+      const parsedSizes = req.body.sizes ? JSON.parse(req.body.sizes) : product.details.sizes;
+      const parsedColors = req.body.colors ? JSON.parse(req.body.colors) : product.details.colors;
+   
 
-  try {
-    const product = await Product.findById(id);
-
-    if (!product) {
-      return res.status(404).json({ message: "Dress not found" });
+      // Update the product explicitly with dot notation for nested fields
+      const updatedProduct = await Product.findByIdAndUpdate(
+        id,
+        {
+          $set: {
+            ...req.body,
+            images: [...existingImages, ...newImages],
+            "details.sizes": parsedSizes,
+            "details.colors": parsedColors, // Use dot notation for nested fields
+          },
+        },
+        { new: true } // Return the updated document
+      );
+  
+      res.status(200).json({ message: "Dress updated successfully", product: updatedProduct });
+    } catch (err) {
+      res.status(500).json({ message: "Error updating dress", error: err.message });
     }
-
-    const existingImages = product.images;
-    const newImages = req.files ? req.files.map((file) => file.filename) : [];
-
-    if (existingImages.length + newImages.length > 5) {
-      return res.status(400).json({ message: "Cannot have more than 5 images for a dress" });
-    }
-
-    const parsedSizes = req.body.sizes ? JSON.parse(req.body.sizes) : product.details.sizes;
-    const parsedColors = req.body.colors ? JSON.parse(req.body.colors) : product.details.colors;
-
-    const updatedData = {
-      ...req.body,
-      images: [...existingImages, ...newImages],
-      "details.sizes": parsedSizes,
-      "details.colors": parsedColors,
-    };
-
-    const updatedProduct = await Product.findByIdAndUpdate(id, updatedData, { new: true });
-
-    res.status(200).json({ message: "Dress updated successfully", product: updatedProduct });
-  } catch (err) {
-    res.status(500).json({ message: "Error updating dress", error: err.message });
-  }
-};
+  };
+  
+  
 
 // Delete a dress
 exports.deleteDress = async (req, res) => {

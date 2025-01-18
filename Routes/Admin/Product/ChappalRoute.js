@@ -9,6 +9,9 @@ const upload = multerConfig.array('images',5)
 //create new chappal
 router.post('/create',verifyToken(['admin']),upload,chappalController.createChappal);
 
+//get all products
+router.get('/all', chappalController.getAllProducts)
+
 //get all chappals
 router.get('/get',verifyToken(['admin']),chappalController.getChappals);
 
