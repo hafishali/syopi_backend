@@ -167,6 +167,17 @@ exports.updateProduct = async (req, res) => {
       "details.colors": parsedColors,
     };
 
+     // Ensure prices are explicitly updated
+     if (req.body.wholesalePrice !== undefined) {
+      updatedData["prices.wholesalePrice"] = parseFloat(req.body.wholesalePrice);
+    }
+    if (req.body.normalPrice !== undefined) {
+      updatedData["prices.normalPrice"] = parseFloat(req.body.normalPrice);
+    }
+    if (req.body.offerPrice !== undefined) {
+      updatedData["prices.offerPrice"] = parseFloat(req.body.offerPrice);
+    }
+
     const updatedProduct = await Product.findByIdAndUpdate(id, updatedData, { new: true });
 
     res.status(200).json({ message: "Product updated successfully", product: updatedProduct });

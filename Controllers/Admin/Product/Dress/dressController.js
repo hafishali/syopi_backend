@@ -225,6 +225,15 @@ exports.updateDress = async (req, res) => {
       const parsedSizes = req.body.sizes ? JSON.parse(req.body.sizes) : product.details.sizes;
       const parsedColors = req.body.colors ? JSON.parse(req.body.colors) : product.details.colors;
    
+      const parsedWholesalePrice = req.body.wholesalePrice
+        ? parseFloat(req.body.wholesalePrice)
+        : product.prices.wholesalePrice;
+      const parsedNormalPrice = req.body.normalPrice
+        ? parseFloat(req.body.normalPrice)
+        : product.prices.normalPrice;
+      const parsedOfferPrice = req.body.offerPrice
+        ? parseFloat(req.body.offerPrice)
+        : product.prices.offerPrice;
 
       // Update the product explicitly with dot notation for nested fields
       const updatedProduct = await Product.findByIdAndUpdate(
@@ -235,6 +244,9 @@ exports.updateDress = async (req, res) => {
             images: [...existingImages, ...newImages],
             "details.sizes": parsedSizes,
             "details.colors": parsedColors, // Use dot notation for nested fields
+            "prices.wholesalePrice": parsedWholesalePrice,
+            "prices.normalPrice": parsedNormalPrice,
+            "prices.offerPrice": parsedOfferPrice,
           },
         },
         { new: true } // Return the updated document

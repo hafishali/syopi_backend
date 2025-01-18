@@ -244,11 +244,24 @@ exports.updateChappal = async (req, res) => {
       const parsedSizes = req.body.sizes ? JSON.parse(req.body.sizes) : product.details.sizes;
       const parsedColours = req.body.colours ? JSON.parse(req.body.colours) : product.details.colours;
   
+      const parsedWholesalePrice = req.body.wholesalePrice
+        ? parseFloat(req.body.wholesalePrice)
+        : product.prices.wholesalePrice;
+      const parsedNormalPrice = req.body.normalPrice
+        ? parseFloat(req.body.normalPrice)
+        : product.prices.normalPrice;
+      const parsedOfferPrice = req.body.offerPrice
+        ? parseFloat(req.body.offerPrice)
+        : product.prices.offerPrice;
+
       const updatedData = {
         ...req.body,
         images: [...existingImages, ...newImages],
         "details.sizes": parsedSizes,
         "details.colours": parsedColours,
+        "prices.wholesalePrice": parsedWholesalePrice,
+        "prices.normalPrice": parsedNormalPrice,
+        "prices.offerPrice": parsedOfferPrice,
       };
   
       // Update product
