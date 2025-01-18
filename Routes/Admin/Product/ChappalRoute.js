@@ -10,7 +10,7 @@ const upload = multerConfig.array('images',5)
 router.post('/create',verifyToken(['admin']),upload,chappalController.createChappal);
 
 //get all products
-router.get('/all', chappalController.getAllProducts)
+router.get('/all',verifyToken(['admin']), chappalController.getAllProducts)
 
 //get all chappals
 router.get('/get',verifyToken(['admin']),chappalController.getChappals);
