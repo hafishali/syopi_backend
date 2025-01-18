@@ -3,7 +3,7 @@ const Products=require('../../../Models/Admin/productModel')
 // get all products with filter(brand,type,category,subcategory)
 exports.getallProducts = async (req, res) => {
     try {
-      const { page = 1, limit = 10, brand, type, subcategory, category,material } = req.query;
+      const { page = 1, limit = 10, brand, type, subcategory, category,material ,productType} = req.query;
   
       const query = {};
       if (category) {
@@ -14,6 +14,7 @@ exports.getallProducts = async (req, res) => {
       if (type) query["details.type"] = type;
       if (subcategory) query.subcategory = subcategory;
       if(material)query.material=material
+      if(productType)query.productType=productType
   
       const products = await Products.find(query)
         .skip((page - 1) * limit)
@@ -23,14 +24,14 @@ exports.getallProducts = async (req, res) => {
       const totalCount = await Products.countDocuments(query);
   
       res.status(200).json({
-        message: "products fetched successfully",
         products,
         pagination: {
           currentPage: page,
           totalPages: Math.ceil(totalCount / limit),
           totalItems: totalCount,
-        },
-      });
+        } 
+      }
+      );
     } catch (err) {
       res.status(500).json({ message: "Error fetching chappals", error: err.message });
     }
