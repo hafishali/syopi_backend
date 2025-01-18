@@ -32,7 +32,7 @@ const dressRoute = require('./Routes/Admin/Product/DressRoute')
 const UserCategories=require('./Routes/User/Category/CategoryRoute')
 const UserSubCategories=require('./Routes/User/SubCategory/SubCategoryRoute')
 const userProducts=require('./Routes/User/Products/Products')
-
+const vendorProductRoute = require('./Routes/Vendor/Product/productRoute')
 
 
 
@@ -60,6 +60,7 @@ app.use('/vendor/category', vendorCategoryRoute);
 app.use('/vendor/subcategory', vendorSubcategoryRoute);
 app.use('/vendor/notification', vendorNotificationRoute);
 app.use('/vendor/slider', vendorSliderRoute);
+app.use('/vendor/product', vendorProductRoute)
 
 
 

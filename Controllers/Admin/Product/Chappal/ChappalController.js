@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const subCategory = require('../../../../Models/Admin/SubCategoryModel');
 const Admin = require('../../../../Models/Admin/AdminModel')
-
+const Vendor = require('../../../../Models/Admin/VendorModel')
 
 // Create a new chappal
 exports.createChappal = async (req, res) => {
@@ -44,7 +44,7 @@ exports.createChappal = async (req, res) => {
     } else {
       const vendor = await Vendor.findById(owner);
       if (vendor) {
-        ownerType = vendor.role || "Vendor"; // Assume vendors have a default role like 'Vendor'
+        ownerType = vendor.role || "vendor"; // Assume vendors have a default role like 'Vendor'
       } else {
         return res.status(400).json({ message: "Invalid owner ID" });
       }
@@ -148,7 +148,7 @@ exports.getAllProducts = async (req, res) => {
     try {
       const { page = 1, limit = 10, brand, type, subcategory, category } = req.query;
   
-      const query = {};
+      const query = {ownerType: "admin"};
       if (category) {
         query.category = category; // Query by category ID directly
       }
