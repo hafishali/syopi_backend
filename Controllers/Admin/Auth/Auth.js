@@ -33,7 +33,7 @@ exports.registerAdmin = async (req, res) => {
     const refreshToken = generateRefreshToken(payload);
         
       
-        const responseAdmin = { email: existingAdmin.email, username: existingAdmin.username, role: existingAdmin.role }; // Assuming role exists in schema
+        const responseAdmin = { email: existingAdmin.email,id: existingAdmin._id, username: existingAdmin.username, role: existingAdmin.role }; // Assuming role exists in schema
         return res.status(200).json({
             message: "Admin Logined successfully.",
             admin: responseAdmin,
