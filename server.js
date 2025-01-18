@@ -33,7 +33,10 @@ const UserCategories=require('./Routes/User/Category/CategoryRoute')
 const UserSubCategories=require('./Routes/User/SubCategory/SubCategoryRoute')
 const userProducts=require('./Routes/User/Products/Products')
 const vendorProductRoute = require('./Routes/Vendor/Product/productRoute')
-
+const vendorOfferRoute = require('./Routes/Vendor/Offer/OfferRoute')
+const vendorCouponRoute = require('./Routes/Vendor/Coupon/couponRoute');
+const userWishlistRoute = require('./Routes/User/Wishlist/WishlistRoute');
+const adminWishlistRoute = require('./Routes/Admin/Wishlist/WishlistRoute');
 
 
 
@@ -53,6 +56,7 @@ app.use('/admin/user', userRoute);
 app.use('/admin/product/chappal',chappalRoute);
 app.use('/admin/product/dress',dressRoute);
 app.use('/admin/offer', offerRoutes)
+app.use('/admin/wishlist', adminWishlistRoute)
 
 // vendor
 app.use('/vendor/auth', vendorAuth);
@@ -61,6 +65,8 @@ app.use('/vendor/subcategory', vendorSubcategoryRoute);
 app.use('/vendor/notification', vendorNotificationRoute);
 app.use('/vendor/slider', vendorSliderRoute);
 app.use('/vendor/product', vendorProductRoute)
+app.use('/vendor/offer', vendorOfferRoute)
+app.use('/vendor/coupon', vendorCouponRoute)
 
 
 
@@ -70,6 +76,7 @@ app.use('/user/auth',userAuth)
 app.use('/user/categories',UserCategories)
 app.use('/user/Subcategories',UserSubCategories)
 app.use('/user/Products',userProducts)
+app.use('/user/wishlist',userWishlistRoute)
 
 
 scheduleCouponCron();
