@@ -9,6 +9,9 @@ router.post('/create', verifyAdminToken(['admin']), offerController.createOffer)
 // Get All Offers
 router.get('/get', offerController.getOffers);
 
+// get an offer  by id
+router.get('/get/:id', offerController.getOfferById);
+
 // Update Offer
 router.patch('/update/:id', verifyAdminToken(['admin']), offerController.updateOffer);
 

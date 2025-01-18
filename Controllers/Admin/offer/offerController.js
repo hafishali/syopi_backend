@@ -3,9 +3,7 @@ const Admin = require('../../../Models/Admin/AdminModel');
 
 // create offer
 exports.createOffer = async (req,res) => {
-    const { offerName, offerType, amount, startDate, expireDate, category, subcategory,
-        // product,
-         status } = req.body;
+    const { offerName, offerType, amount, startDate, expireDate, category, subcategory,product,status } = req.body;
 
 
   try {
@@ -23,7 +21,7 @@ exports.createOffer = async (req,res) => {
       expireDate,
       category: category || [],
       subcategory: subcategory || [],
-    // products: products || [],
+      products: products || [],
       status,
       createdBy: admin._id,  
     });
@@ -44,7 +42,7 @@ exports.getOffers = async (req, res) => {
         const offers = await Offer.find()
         .populate('category', 'name')
         .populate('subcategory', 'name')
-        // .populate('products', 'name')
+        .populate('products', 'name')
         .populate('createdBy', 'role')
         .sort({ startDate: 1 }); // Sort by start date
   
@@ -53,6 +51,28 @@ exports.getOffers = async (req, res) => {
       res.status(500).json({ message: 'Error fetching offers', error: error.message });
     }
   };
+
+  // Get Offer by ID
+exports.getOfferById = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const offer = await Offer.findById(id)
+      .populate('category', 'name') 
+      .populate('subcategory', 'name') 
+      .populate('products', 'name')
+      .populate('createdBy', 'role '); 
+
+    if (!offer) {
+      return res.status(404).json({ message: 'Offer not found' });
+    }
+
+    res.status(200).json({ offer });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching offer', error: error.message });
+  }
+};
+
   
   // Update Offer
   exports.updateOffer = async (req, res) => {
