@@ -37,6 +37,7 @@ const vendorOfferRoute = require('./Routes/Vendor/Offer/OfferRoute')
 const vendorCouponRoute = require('./Routes/Vendor/Coupon/couponRoute');
 const userWishlistRoute = require('./Routes/User/Wishlist/WishlistRoute');
 const adminWishlistRoute = require('./Routes/Admin/Wishlist/WishlistRoute');
+const vendorWishlistRoute = require('./Routes/Vendor/Wishlist/WishlistRoute');
 
 
 
@@ -67,6 +68,8 @@ app.use('/vendor/slider', vendorSliderRoute);
 app.use('/vendor/product', vendorProductRoute)
 app.use('/vendor/offer', vendorOfferRoute)
 app.use('/vendor/coupon', vendorCouponRoute)
+app.use('/vendor/wishlist', vendorWishlistRoute)
+
 
 
 
