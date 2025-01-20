@@ -37,6 +37,8 @@ const vendorOfferRoute = require('./Routes/Vendor/Offer/OfferRoute')
 const vendorCouponRoute = require('./Routes/Vendor/Coupon/couponRoute');
 const userWishlistRoute = require('./Routes/User/Wishlist/WishlistRoute');
 const adminWishlistRoute = require('./Routes/Admin/Wishlist/WishlistRoute');
+const vendorWishlistRoute = require('./Routes/Vendor/Wishlist/WishlistRoute');
+const userAddressRoute = require('./Routes/User/Address/addressRoute');
 
 
 
@@ -67,6 +69,8 @@ app.use('/vendor/slider', vendorSliderRoute);
 app.use('/vendor/product', vendorProductRoute)
 app.use('/vendor/offer', vendorOfferRoute)
 app.use('/vendor/coupon', vendorCouponRoute)
+app.use('/vendor/wishlist', vendorWishlistRoute)
+
 
 
 
@@ -77,6 +81,7 @@ app.use('/user/categories',UserCategories)
 app.use('/user/Subcategories',UserSubCategories)
 app.use('/user/Products',userProducts)
 app.use('/user/wishlist',userWishlistRoute)
+app.use('/user/address',userAddressRoute)
 
 
 scheduleCouponCron();
