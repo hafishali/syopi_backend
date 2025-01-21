@@ -20,7 +20,6 @@ const CategoryRoutes = require('./Routes/Admin/Category/CategouryRoute');
 const SubcategoryRoutes = require('./Routes/Admin/SubCategory/SubCategoryRoute');
 const SliderRoutes = require('./Routes/Admin/Slider/SliderRoute');
 const NotificationRoute = require('./Routes/Admin/Notification/NotificationRoute');
-const chappalRoute = require('./Routes/Admin/Product/ChappalRoute')
 const vendorRoute = require('./Routes/Admin/Vendor/VendorRoute');
 const userRoute = require('./Routes/Admin/User/UserRoute');
 const vendorAuth = require('./Routes/Vendor/Auth/AuthRoute');
@@ -28,11 +27,11 @@ const vendorCategoryRoute = require('./Routes/Vendor/Category/CategoryRoute');
 const vendorSubcategoryRoute = require('./Routes/Vendor/SubCategory/SubcategoryRoute');
 const vendorNotificationRoute = require('./Routes/Vendor/Notification/NotificationRoute');
 const vendorSliderRoute = require('./Routes/Vendor/Slider/SliderRoute');
-const dressRoute = require('./Routes/Admin/Product/DressRoute')
 const UserCategories=require('./Routes/User/Category/CategoryRoute')
 const UserSubCategories=require('./Routes/User/SubCategory/SubCategoryRoute')
 const userProducts=require('./Routes/User/Products/Products')
 const vendorProductRoute = require('./Routes/Vendor/Product/productRoute')
+const adminProductRoute = require('./Routes/Admin/Product/productRoute')
 const vendorOfferRoute = require('./Routes/Vendor/Offer/OfferRoute')
 const vendorCouponRoute = require('./Routes/Vendor/Coupon/couponRoute');
 const userWishlistRoute = require('./Routes/User/Wishlist/WishlistRoute');
@@ -57,9 +56,8 @@ app.use('/admin/slider',SliderRoutes);
 app.use('/admin/notification',NotificationRoute);
 app.use('/admin/vendor', vendorRoute);
 app.use('/admin/user', userRoute);
-app.use('/admin/product/chappal',chappalRoute);
-app.use('/admin/product/dress',dressRoute);
 app.use('/admin/offer', offerRoutes)
+app.use('/admin/product', adminProductRoute) 
 app.use('/admin/wishlist', adminWishlistRoute)
 app.use('/admin/profile', adminProfileRoute)
 

@@ -8,7 +8,7 @@ const couponSchema = new mongoose.Schema({
   endDate: { type: Date, required: true },
   status: { type: String, enum: ['active', 'expired', 'inactive'], default: 'active'},
   applicableCategories: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Category' }],
-  applicableSubcategories: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Subcategory' }],
+  applicableSubcategories: [{ type: mongoose.Schema.Types.ObjectId, ref: 'SubCategory' }],
   applicableProducts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
 createdBy: {
       type: mongoose.Schema.Types.ObjectId,
