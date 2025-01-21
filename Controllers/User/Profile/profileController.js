@@ -18,11 +18,15 @@ exports.getUserProfile = async(req,res) => {
 // update userData
 exports.updateUserData = async(req,res) => {
     try {
-        if (!req.body || Object.keys(req.body).length === 0) {
+        if ((!req.body || Object.keys(req.body).length === 0) && !req.file) {
             return res.status(400).json({ message: "No data provided for update" });
-        }
+          }
+          const updatedData = { ...req.body };
+          if (req.file && req.file.filename) {
+            updatedData.image = req.file.filename;
+          }
         const userId = req.user.id;
-        const updatedUser = await User.findByIdAndUpdate(userId,req.body,{ new: true, runValidators: true}).select("-password");
+        const updatedUser = await User.findByIdAndUpdate(userId,updatedData,{ new: true, runValidators: true}).select("-password");
         if(!updatedUser || updatedUser.length === 0){
             return res.status(404).json({ message: "user not found" })
         }
