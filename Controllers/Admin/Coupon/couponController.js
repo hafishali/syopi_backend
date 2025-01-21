@@ -1,5 +1,7 @@
 const Coupon = require('../../../Models/Admin/couponModel')
 const Category = require('../../../Models/Admin/CategoryModel')
+const SubCategory = require('../../../Models/Admin/SubCategoryModel')
+const Product = require('../../../Models/Admin/productModel')
 const validateCouponLogic = require('../../../utils/validateCoupon');
 const Admin = require('../../../Models/Admin/AdminModel')
 // create coupon

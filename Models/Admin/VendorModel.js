@@ -83,12 +83,12 @@ const vendorSchema = new mongoose.Schema({
         type:String,
     },
     password: {
-        type: String,
+        type: String, 
         required:[true, "password is required"],
         minlength: [6, 'Password must be at least 6 characters long'],
     },
     ratingsAverage: { 
-        type: Number, 
+        type: Number,  
         default: 0, 
         min: 0, 
         max: 5
