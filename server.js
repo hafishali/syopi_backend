@@ -32,7 +32,15 @@ const UserSubCategories=require('./Routes/User/SubCategory/SubCategoryRoute')
 const userProducts=require('./Routes/User/Products/Products')
 const vendorProductRoute = require('./Routes/Vendor/Product/productRoute')
 const adminProductRoute = require('./Routes/Admin/Product/productRoute')
-
+const vendorOfferRoute = require('./Routes/Vendor/Offer/OfferRoute')
+const vendorCouponRoute = require('./Routes/Vendor/Coupon/couponRoute');
+const userWishlistRoute = require('./Routes/User/Wishlist/WishlistRoute');
+const adminWishlistRoute = require('./Routes/Admin/Wishlist/WishlistRoute');
+const vendorWishlistRoute = require('./Routes/Vendor/Wishlist/WishlistRoute');
+const userAddressRoute = require('./Routes/User/Address/addressRoute');
+const adminProfileRoute = require('./Routes/Admin/Profile/profileRoute');
+const userProfileRoute = require('./Routes/User/Profile/profileRoute');
+const vendorProfileRoute = require('./Routes/Vendor/Profile/profileRoute');
 
 
 
@@ -50,6 +58,9 @@ app.use('/admin/vendor', vendorRoute);
 app.use('/admin/user', userRoute);
 app.use('/admin/offer', offerRoutes)
 app.use('/admin/product', adminProductRoute) 
+app.use('/admin/wishlist', adminWishlistRoute)
+app.use('/admin/profile', adminProfileRoute)
+
 
 // vendor
 app.use('/vendor/auth', vendorAuth);
@@ -58,6 +69,11 @@ app.use('/vendor/subcategory', vendorSubcategoryRoute);
 app.use('/vendor/notification', vendorNotificationRoute);
 app.use('/vendor/slider', vendorSliderRoute);
 app.use('/vendor/product', vendorProductRoute)
+app.use('/vendor/offer', vendorOfferRoute)
+app.use('/vendor/coupon', vendorCouponRoute)
+app.use('/vendor/wishlist', vendorWishlistRoute)
+app.use('/vendor/profile', vendorProfileRoute)
+
 
 
 
@@ -67,6 +83,9 @@ app.use('/user/auth',userAuth)
 app.use('/user/categories',UserCategories)
 app.use('/user/Subcategories',UserSubCategories)
 app.use('/user/Products',userProducts)
+app.use('/user/wishlist',userWishlistRoute)
+app.use('/user/address',userAddressRoute)
+app.use('/user/profile',userProfileRoute)
 
 
 scheduleCouponCron();
