@@ -30,6 +30,12 @@ const vendorSliderRoute = require('./Routes/Vendor/Slider/SliderRoute');
 const UserCategories=require('./Routes/User/Category/CategoryRoute')
 const UserSubCategories=require('./Routes/User/SubCategory/SubCategoryRoute')
 const userProducts=require('./Routes/User/Products/Products')
+
+const userCart=require('./Routes/User/Cart/CartRoute')
+
+
+
+
 const vendorProductRoute = require('./Routes/Vendor/Product/productRoute')
 const adminProductRoute = require('./Routes/Admin/Product/productRoute')
 const vendorOfferRoute = require('./Routes/Vendor/Offer/OfferRoute')
@@ -41,6 +47,7 @@ const userAddressRoute = require('./Routes/User/Address/addressRoute');
 const adminProfileRoute = require('./Routes/Admin/Profile/profileRoute');
 const userProfileRoute = require('./Routes/User/Profile/profileRoute');
 const vendorProfileRoute = require('./Routes/Vendor/Profile/profileRoute');
+
 
 
 
@@ -83,9 +90,11 @@ app.use('/user/auth',userAuth)
 app.use('/user/categories',UserCategories)
 app.use('/user/Subcategories',UserSubCategories)
 app.use('/user/Products',userProducts)
+app.use('/user/cart',userCart)
 app.use('/user/wishlist',userWishlistRoute)
 app.use('/user/address',userAddressRoute)
 app.use('/user/profile',userProfileRoute)
+
 
 
 scheduleCouponCron();
