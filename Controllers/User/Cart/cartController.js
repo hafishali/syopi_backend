@@ -86,12 +86,12 @@ exports.getCart = async (req, res) => {
   const { userId } = req.params;
 
   try {
-    const cart = await Cart.find({ userId:userId })
+    const cart = await Cart.find({ userId:userId }).populate('items.productId', 'name images') .exec();
     if (!cart) {
       return res.status(404).json({ success: false, message: 'Cart not found' });
     }
 
-    res.status(200).json({ success: true, cart });
+    res.status(200).json(cart);
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, 
