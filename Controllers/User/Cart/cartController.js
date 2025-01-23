@@ -101,9 +101,9 @@ exports.getCart = async (req, res) => {
 
 // increment or decrement quantity
 exports.updateCartQuantity = async (req, res) => {
-  const { userId, productId, color, size, action } = req.body;
+  const { userId, itemId, action } = req.body; // Using itemId instead of productId, color, size
 
-  if (!userId || !productId || !color || !size || !action) {
+  if (!userId || !itemId || !action) {
     return res.status(400).json({ success: false, message: 'Missing required fields' });
   }
 
@@ -116,29 +116,31 @@ exports.updateCartQuantity = async (req, res) => {
     if (!cart) {
       return res.status(404).json({ success: false, message: 'Cart not found' });
     }
-    const itemIndex = cart.items.findIndex(
-      item =>
-        item.productId.toString() === productId.toString() &&
-        item.color === color &&
-        item.size === size
-    );
 
-    if (itemIndex === -1) {
+    // Find the specific item by its _id
+    const item = cart.items.id(itemId);
+    if (!item) {
       return res.status(404).json({ success: false, message: 'Product not found in cart' });
     }
 
     if (action === 'increment') {
-      cart.items[itemIndex].quantity += 1;
+      item.quantity += 1;
     } else if (action === 'decrement') {
-      cart.items[itemIndex].quantity -= 1;
+      item.quantity -= 1;
 
-      if (cart.items[itemIndex].quantity <= 0) {
-        cart.items.splice(itemIndex, 1);
+      if (item.quantity <= 0) {
+        // Remove the item if the quantity becomes 0 or less
+        item.remove();
       }
     }
+
     await cart.save();
 
-    res.status(200).json({ success: true, message: 'Product quantity updated successfully', cart });
+    res.status(200).json({
+      success: true,
+      message: 'Product quantity updated successfully',
+      cart,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Failed to update product quantity' });
@@ -146,11 +148,12 @@ exports.updateCartQuantity = async (req, res) => {
 };
 
 
+
 // Remove Product from Cart
 exports.removeProductFromCart = async (req, res) => {
-  const { userId, productId, color, size } = req.body;
+  const { userId, itemId } = req.body; // Using itemId to identify the cart item
 
-  if (!userId || !productId || !color || !size) {
+  if (!userId || !itemId) {
     return res.status(400).json({ success: false, message: 'Missing required fields' });
   }
 
@@ -161,30 +164,30 @@ exports.removeProductFromCart = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Cart not found' });
     }
 
-    // Find the product in the cart
-    const itemIndex = cart.items.findIndex(
-      item =>
-        item.productId.toString() === productId.toString() &&
-        item.color === color &&
-        item.size === size
-    );
-
+    // Find the index of the item to remove
+    const itemIndex = cart.items.findIndex(item => item._id.toString() === itemId);
     if (itemIndex === -1) {
       return res.status(404).json({ success: false, message: 'Product not found in cart' });
     }
 
-    // Remove the product from the cart
+    // Remove the item from the cart
     cart.items.splice(itemIndex, 1);
 
     // Save the updated cart
     await cart.save();
 
-    res.status(200).json({ success: true, message: 'Product removed from cart successfully', cart });
+    res.status(200).json({
+      success: true,
+      message: 'Product removed from cart successfully',
+      cart,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Failed to remove product from cart' });
   }
 };
+
+
 
 // delete cart
 exports.deleteCart = async (req, res) => {
