@@ -44,27 +44,43 @@ const CartSchema = new mongoose.Schema({
 },{timestamps:true});
 
 CartSchema.pre('save', async function (next) {
-    try {
-      let subtotal = 0;
-      let totalPrice=0
-  
-      for (const item of this.items) {
-        const product = await Product.findById(item.productId).select('prices');
+  try {
+    let subtotal = 0;
+
+    for (const item of this.items) {
+      if (!item.price) {
+        // Only process items that don't already have a price set
+        const product = await Product.findById(item.productId).select('variants');
         if (!product) {
           throw new Error(`Product with ID ${item.productId} not found`);
         }
-        item.price = product.prices.offerPrice 
-        subtotal += item.price * item.quantity;
+
+        const variant = product.variants.find(variant => variant.color === item.color);
+        if (!variant) {
+          throw new Error(`Variant with color ${item.color} not found for product ID ${item.productId}`);
+        }
+
+        const sizeDetails = variant.sizes.find(size => size.size === item.size);
+        if (!sizeDetails) {
+          throw new Error(`Size ${item.size} not found for product ID ${item.productId} with color ${item.color}`);
+        }
+
+        item.price = variant.offerPrice;
       }
-      this.subtotal = subtotal;
-      this.totalPrice=subtotal
-   
-  
-      next();
-    } catch (error) {
-      next(error);
+
+      subtotal += item.price * item.quantity;
     }
-  });
+
+    this.subtotal = subtotal;
+    this.totalPrice = subtotal;
+
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
+
   
 
 const Cart = mongoose.model('Cart', CartSchema);
