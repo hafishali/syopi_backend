@@ -1,36 +1,48 @@
-const Coupon = require('../../../Models/Vendor/CouponModel');
+const Coupon = require('../../../Models/Admin/couponModel')
 const Vendor = require('../../../Models/Admin/VendorModel');
 const validateCouponLogic = require('../../../utils/validateCoupon');
 
 //create coupon
-exports.createCoupon = async(req,res) =>{
-    const { code, type, value, startDate, endDate,
-        applicableCategories, 
-        applicableSubcategories, applicableProducts } = req.body;
-    
+exports.createCoupon = async (req, res) => {
+    const {
+      code, type, value, startDate, endDate,
+      applicableCategories,
+      applicableSubcategories, applicableProducts,
+    } = req.body;
+  
     try {
-        const vendor = await Vendor.findById(req.user.id);
-        if (!vendor) {
-            return res.status(403).json({ message: 'Only vendors can create offers.' });
-        }
-
-        const newCoupon = new Coupon({
-            code,
-            type,
-            value,
-            startDate,
-            endDate,
-            applicableCategories,
-            applicableSubcategories,
-            applicableProducts,
-            createdBy: vendor._id,
-        })
-        await newCoupon.save();
-        res.status(201).json({ message: 'Coupon created successfully', coupon: newCoupon });
+      // Ensure that the user role is either 'admin' or 'vendor'
+      let createdByRole;
+      if (req.user.role === 'admin') {
+        createdByRole = 'Admin';
+      } else if (req.user.role === 'vendor') {
+        createdByRole = 'Vendor';
+      } else {
+        return res.status(403).json({ message: 'Unauthorized: Invalid role' });
+      }
+  
+      // Create a new coupon with the relevant details
+      const newCoupon = new Coupon({
+        code,
+        type,
+        value,
+        startDate,
+        endDate,
+        applicableCategories,
+        applicableSubcategories,
+        applicableProducts,
+        createdBy: req.user.id, // Set the creator's ID from authenticated user
+        createdByRole, // Set the creator's role
+      });
+  
+      // Save the coupon to the database
+      await newCoupon.save();
+      res.status(201).json({ message: 'Coupon created successfully', coupon: newCoupon });
     } catch (error) {
-        res.status(500).json({ message: 'Error creating coupon', error: error.message });
+      res.status(500).json({ message: 'Error creating coupon', error: error.message });
     }
-}
+  };
+  
 
 //get all coupons
 exports.getCoupons = async (req, res) => {
