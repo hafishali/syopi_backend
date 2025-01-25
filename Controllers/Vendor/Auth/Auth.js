@@ -27,6 +27,7 @@ exports.login = async(req,res) => {
         return res.status(200).json({
             message: "Vendor Logined successfully.",
             vendorId: existingVendor._id,
+            role:existingVendor.role,
             accessToken,
             refreshToken
         });

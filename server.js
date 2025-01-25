@@ -32,6 +32,7 @@ const UserSubCategories=require('./Routes/User/SubCategory/SubCategoryRoute')
 const userProducts=require('./Routes/User/Products/Products')
 
 const userCart=require('./Routes/User/Cart/CartRoute')
+const Checkout=require('./Routes/User/Checkout/CheckoutRoute')
 
 
 
@@ -94,6 +95,7 @@ app.use('/user/cart',userCart)
 app.use('/user/wishlist',userWishlistRoute)
 app.use('/user/address',userAddressRoute)
 app.use('/user/profile',userProfileRoute)
+app.use('/user/checkout',Checkout)
 
 
 

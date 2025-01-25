@@ -7,37 +7,45 @@ const Admin = require('../../../Models/Admin/AdminModel')
 // create coupon
 
 exports.createCoupon = async (req, res) => {
-    const {
-      code, type, value, startDate, endDate,
-      applicableCategories, 
-      applicableSubcategories, applicableProducts,
-    } = req.body;
-  
-    try {
+  const {
+    code, type, value, startDate, endDate,
+    applicableCategories,
+    applicableSubcategories, applicableProducts,
+  } = req.body;
 
-      const admin = await Admin.findById(req.user.id);
-          if (!admin) {
-            return res.status(403).json({ message: 'Only admins can create offers.' });
-          }
-
-      const newCoupon = new Coupon({
-        code,
-        type,
-        value,
-        startDate,
-        endDate,
-        applicableCategories,
-        applicableSubcategories,
-        applicableProducts,
-        createdBy: admin._id,
-      });
-  
-      await newCoupon.save();
-      res.status(201).json({ message: 'Coupon created successfully', coupon: newCoupon });
-    } catch (error) {
-      res.status(500).json({ message: 'Error creating coupon', error: error.message });
+  try {
+    // Ensure that the user role is either 'admin' or 'vendor'
+    let createdByRole;
+    if (req.user.role === 'admin') {
+      createdByRole = 'Admin';
+    } else if (req.user.role === 'vendor') {
+      createdByRole = 'Vendor';
+    } else {
+      return res.status(403).json({ message: 'Unauthorized: Invalid role' });
     }
-  };
+
+    // Create a new coupon with the relevant details
+    const newCoupon = new Coupon({
+      code,
+      type,
+      value,
+      startDate,
+      endDate,
+      applicableCategories,
+      applicableSubcategories,
+      applicableProducts,
+      createdBy: req.user.id, // Set the creator's ID from authenticated user
+      createdByRole, // Set the creator's role
+    });
+
+    // Save the coupon to the database
+    await newCoupon.save();
+    res.status(201).json({ message: 'Coupon created successfully', coupon: newCoupon });
+  } catch (error) {
+    res.status(500).json({ message: 'Error creating coupon', error: error.message });
+  }
+};
+
   
   // get all coupon
 
