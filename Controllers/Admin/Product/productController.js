@@ -85,36 +85,54 @@ exports.createProduct = async (req, res) => {
     }
   };
      
-  
-  
-
 // Get all products with variants
 exports.getProducts = async (req, res) => {
   try {
-    const { page = 1, limit = 10, productType, ownerType, brand, category, subcategory } = req.query;
+    const { productType,brand,minPrice,maxPrice,size } = req.query;
 
-    const query = {};
-    if (productType) query.productType = productType;
-    if (ownerType) query.ownerType = ownerType;
-    if (brand) query.brand = brand;
-    if (category) query.category = category;
-    if (subcategory) query.subcategory = subcategory;
+    const query = [];
+    const matchStage = {};
 
-    const products = await Product.find(query)
-      .skip((page - 1) * limit)
-      .limit(Number(limit))
-      .sort({ createdAt: -1 });
+    if (productType) matchStage.productType = productType;
+    if (brand) matchStage.brand = brand;
+     
 
-    const totalCount = await Product.countDocuments(query);
+    if (minPrice || maxPrice) {
+      // Here we filter based on the first variant's offerPrice
+      matchStage["variants.0.offerPrice"] = {
+        $gte: minPrice ? Number(minPrice) : 0,
+        $lte: maxPrice ? Number(maxPrice) : Number.MAX_VALUE,
+      };
+    }
+
+    if (size) {
+      const sizes = size.split(',').map((s) => s.trim()).filter((s) => s.length > 0);
+      if (sizes.length > 0) {
+        matchStage["variants.sizes.size"] = { $in: sizes };
+      } else {
+        return res.status(400).json({ message: "Invalid size provided" });
+      }
+    }
+
+    if (Object.keys(matchStage).length > 0) {
+      query.push({ $match: matchStage });
+    }
+
+    let products;
+    if(query.length > 0){
+      products = await Product.aggregate(query);
+    } else {
+      products = await Product.find();
+    }
+  
+    if(!products || products.length === 0){
+      return res.status(404).json({ message: "No products found" })
+    }
 
     res.status(200).json({
       message: "Products fetched successfully",
+      total: products.length,
       products,
-      pagination: {
-        currentPage: page,
-        totalPages: Math.ceil(totalCount / limit),
-        totalItems: totalCount,
-      },
     });
   } catch (err) {
     res.status(500).json({ message: "Error fetching products", error: err.message });
@@ -241,3 +259,5 @@ exports.deleteProduct = async (req, res) => {
     res.status(500).json({ message: "Error deleting product", error: err.message });
   }
 };
+
+// 
