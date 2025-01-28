@@ -75,6 +75,7 @@ exports.createProduct = async (req, res) => {
         features: parsedFeatures, // Add parsed features here
         owner: req.body.owner,
         ownerType,
+        
       });
   
       await newProduct.save();

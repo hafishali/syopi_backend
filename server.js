@@ -5,9 +5,11 @@ const passport = require('passport')
 require('./DB/mongo')
 const path = require('path')
 const app = express()
+const cron = require('node-cron')
 app.use(cors())
 app.use(express.json())
 
+const removeExpiredOffers = require("./utils/removeExpiredOffers")
 const { scheduleCouponCron } = require('./utils/cronTasks')
 require('./Configs/passportConfigGoogle')
 
@@ -71,6 +73,11 @@ app.use('/user/Products',userProducts)
 
 scheduleCouponCron();
 
+// Schedule the cron job to run every day at midnight
+cron.schedule("0 0 * * *", async () => {
+    console.log("Running daily expired offers cleanup...");
+    await removeExpiredOffers();
+  });
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
  
