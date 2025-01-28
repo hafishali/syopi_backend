@@ -15,4 +15,7 @@ router.get('/view/:id',attachWishlistIfAuthenticated,productController.getProduc
 // search products 
 router.get('/search',attachWishlistIfAuthenticated,productController.searchProducts);
 
+// sorting based on price
+router.get('/sort',attachWishlistIfAuthenticated,productController.getSortedProducts);
+
 module.exports=router
