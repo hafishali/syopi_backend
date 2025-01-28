@@ -47,8 +47,13 @@ const userSchema = new mongoose.Schema(
         message: 'Password is required and must be at least 6 characters long unless Google login is used.',
       },
     },
-
-
+    image: {
+      type:String,
+    },
+    gender: {
+      type:String,
+      enum: ['male','female']
+    },
     referralCode: {
       type: String,
       unique: true,

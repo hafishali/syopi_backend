@@ -1,16 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const productController = require('../../../Controllers/User/Products/ProductController')
+const attachWishlistIfAuthenticated = require('../../../Middlewares/WishlistIfAuthenticat');
 const verifyToken = require('../../../Middlewares/jwtConfig')
 const multerConfig=require('../../../Middlewares/MulterConfig')
 
 
 
 // get category
-router.get('/view',productController.getallProducts)
+router.get('/view',attachWishlistIfAuthenticated,productController.getallProducts)
 // view by id
-router.get('/view/:id',productController.getProductById)
+router.get('/view/:id',attachWishlistIfAuthenticated,productController.getProductById)
 
-
+// search products 
+router.get('/search',attachWishlistIfAuthenticated,productController.searchProducts);
 
 module.exports=router
