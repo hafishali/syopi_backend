@@ -18,5 +18,8 @@ router.patch('/update/:id', verifyAdminToken(['admin']), offerController.updateO
 // Delete Offer
 router.delete('/delete/:id', verifyAdminToken(['admin']), offerController.deleteOffer);
 
+//expire
+router.post("/trigger-cleanup", verifyAdminToken(['admin']), offerController.triggerOfferCleanup)
+
 module.exports = router;
  
