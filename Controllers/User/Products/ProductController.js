@@ -128,3 +128,35 @@ exports.getProductById = async (req, res) => {
       res.status(500).json({ message: "Error fetching product", error: err.message });
     }
   };
+
+// sorting based on price
+exports.getSortedProducts = async (req, res) => {
+  try {
+    let userId;
+    if (req.user && req.user.id) {
+      userId = req.user.id;
+    }
+    const {sort} = req.query;
+
+    // Validate the query parameters
+    if (sort && sort !== 'asc' && sort !== 'desc') {
+      return res.status(400).json({ message: 'Invalid sort parameter. Use "asc" or "desc".' });
+    }
+
+    const sortOrder = sort === 'asc' ? 1 : -1;
+
+    const products = await getProduct(userId); 
+
+    // Sort the products based on the first variant's offerPrice
+    const sortedProducts = products.sort((a, b) => {
+      const offerPriceA = a.variants[0]?.offerPrice || 0; // Handle cases where variants might be missing
+      const offerPriceB = b.variants[0]?.offerPrice || 0;
+
+      return sortOrder === 1 ? offerPriceA - offerPriceB : offerPriceB - offerPriceA;
+    });
+
+    res.status(200).json({ message: 'Products sorted successfully', products:sortedProducts });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching sorted products', error: error.message });
+  }
+};
