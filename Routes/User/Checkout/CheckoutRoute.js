@@ -16,7 +16,8 @@ router.delete('/delete/:checkoutId',verifyToken(['customer']),CheckoutController
 // apply coupon
 router.post('/apply/coupon',verifyToken(['customer']),CheckoutController.applyCoupon)
 
-
+//get available coupons
+router.get('/get/:checkoutId/coupons',CheckoutController.getAvailableCoupons);
 
 
 module.exports=router

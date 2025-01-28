@@ -72,6 +72,10 @@ const userSchema = new mongoose.Schema(
         message: (props) => `Invalid referral code: ${props.value}`,
       },
     },
+    coins: {
+      type: Number,
+      default: 0
+    },
     role: { type: String, default: 'customer' },
   },
   { timestamps: true }
