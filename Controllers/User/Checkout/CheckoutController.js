@@ -144,3 +144,50 @@ exports.applyCoupon = async (req, res) => {
         });
     }
 };
+
+// get available coupons
+exports.getAvailableCoupons = async(req,res) => {
+    const {checkoutId} = req.params;
+    try {
+        if (!checkoutId) {
+            return res.status(400).json({ message: 'Checkout ID is required' });
+        }
+
+        // Fetch checkout details
+        const checkout = await Checkout.findById(checkoutId).populate('items.productId');
+
+        if (!checkout) {
+            return res.status(404).json({ message: 'Checkout not found' });
+        }
+
+        const products = checkout.items.map((item) => item.productId);
+
+        // Extract product details
+        const productIds = products.map(product => product._id);
+        const categoryIds = products.map(product => product.category);
+        const subcategoryIds = products.map(product => product.subcategory);
+        const ownerId = products.map(product => product.owner);
+        // const productNames = products.map(product => product.name);
+
+        const Coupons = await Coupon.find({
+            $and: [
+            { applicableCategories: { $in: categoryIds } },
+            { applicableSubcategories: { $in: subcategoryIds } },
+            { applicableProducts: { $in: productIds } },
+            { createdBy: { $in: ownerId } },
+
+            ],
+            status: 'active',
+            startDate: { $lte: new Date() },
+            endDate: { $gte: new Date() },
+        });
+        
+        return res.status(200).json({
+            message: 'Available coupons fetched successfully',
+            total: Coupons.length,
+            Coupons,
+        });
+    } catch (error) {
+        return res.status(500).json({ message: 'Internal Server Error', error:error.message });
+    }
+}

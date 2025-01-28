@@ -15,14 +15,6 @@ exports.registerUser = async (req, res) => {
     const { name, email, phone, password, referredBy } = req.body;
   
     try {
-      // Validate referredBy (optional)
-      let referrer = null;
-      if (referredBy) {
-        referrer = await User.findOne({ referralCode: referredBy });
-        if (!referrer) {
-          return res.status(400).json({ message: 'Invalid referral code' });
-        }
-      }
       const existingUser = await User.findOne({ phone });
       if (existingUser) {
         return res.status(400).json({ msg: 'Phone number already exists' });
@@ -36,11 +28,6 @@ exports.registerUser = async (req, res) => {
       if(response.data.Status !== 'Success'){
         return res.status(500).json({ message: 'Failed to send OTP. Try again later.' });
       }
-
-      if (referrer) {
-        console.log(
-          `Referral successful! Referrer: ${referrer.email || referrer.phone || 'Unknown contact info'}`
-        );      }
 
       return res.status(200).json({ message: 'OTP sent successfully' });
   
@@ -64,6 +51,20 @@ exports.verifyOTP = async(req,res) => {
     const response = await axios.get(`https://2factor.in/API/V1/${api_key}/SMS/VERIFY3/${phone}/${otp}`);
     if(response.data.Status !== 'Success'){
       return res.status(400).json({ message: 'Invalid OTP. Please try again.' })
+    }
+
+    // validate refferedBy (optional)
+    let referredUser = null;
+    if(cachedData.referredBy){
+      referredUser = await User.findOneAndUpdate(
+        { referralCode: cachedData.referredBy },
+        { $inc: { coins: 40 } },
+        { new: true }
+      );
+
+      if(!referredUser){
+        return res.status(400).json({ message: 'Invalid referral code' });
+      }
     }
 
     // Create new user

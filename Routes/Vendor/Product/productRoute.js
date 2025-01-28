@@ -21,4 +21,7 @@ router.patch("/update/:id", verifyToken(["vendor"]), upload, vendorProductContro
 // Delete a product
 router.delete("/delete/:id", verifyToken(["vendor"]), vendorProductController.deleteProduct);
 
+// Delete a specific image by name
+router.delete("/delete/:id/image", verifyToken(["vendor"]), vendorProductController.deleteProductImage);
+
 module.exports = router;
