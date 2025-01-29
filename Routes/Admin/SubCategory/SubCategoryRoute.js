@@ -13,6 +13,9 @@ router.get('/get',verifyToken(['admin']),subCategoryController.getSubCategories)
 // get a subcategory by id
 router.get('/get/:id',verifyToken(['admin']),subCategoryController.getSubCategoryById);
 
+// view subcategory by categoryId
+router.get('/view/subcategory/:id',verifyToken(['admin']),subCategoryController.getSubCategoryByCategory);
+
 // update subcategory
 router.patch('/update/:id',verifyToken(['admin']),multerConfig.single('image'),subCategoryController.updateSubCategory);
 
@@ -21,5 +24,7 @@ router.delete('/delete/:id',verifyToken(['admin']),subCategoryController.deleteS
 
 // search subcategory
 router.get('/search',verifyToken(['admin']),subCategoryController.searchSubCategory);
+
+
 
 module.exports = router; 

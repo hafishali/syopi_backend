@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 
+
 const offerSchema = new mongoose.Schema(
   {
     offerName: {
@@ -47,11 +48,20 @@ const offerSchema = new mongoose.Schema(
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Admin',  // Reference to the Admin model
-      required: true,
+      refPath: "ownerType",
+      // required: true, // Unique admin or vendor creating the offer
     },
+    ownerType: {
+      type: String,
+      enum: ['admin', 'vendor'], // Explicitly distinguish admin vs. vendor
+    },ownerId: { 
+       type: mongoose.Schema.Types.ObjectId,
+       refPath: "ownerType",
+       },
   },
-  { timestamps: true }
+  { timestamps: true } 
 );
+
+
 
 module.exports = mongoose.model('Offer', offerSchema);

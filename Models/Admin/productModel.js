@@ -12,11 +12,11 @@ const productSchema = new mongoose.Schema({
   subcategory: { type: mongoose.Schema.Types.ObjectId, ref: "SubCategory" },
   brand: { type: String, required: true },
   variants: [
-    {
+    { 
       color: { type: String, required: true }, // Example: "Blue"
       price: { type: Number, required: true }, // Example: 600
       wholesalePrice: { type: Number, required: true }, // Example: 500
-      offerPrice: { type: Number, required: true }, // Example: 550
+      offerPrice: { type: Number, default: null }, 
       sizes: [
         {
           size: { type: String, required: true }, // Example: "L", "M"
@@ -39,7 +39,11 @@ const productSchema = new mongoose.Schema({
   ownerType: { type: String, required: true },
   supplierName: { type: String },
   totalStock: { type: Number, default: 0 },
-  offer: { type: Number },
+  offers: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Offer',
+    default: null,
+  }],
   coupon: { type: Number },
   status: { type: String, enum: ["approved", "pending", "rejected"], default: "pending" },
 }, { timestamps: true });
@@ -47,6 +51,8 @@ const productSchema = new mongoose.Schema({
 // Pre-save hook to generate product code, populate supplierName, and calculate total stock
 productSchema.pre("save", async function (next) {
   if (this.isNew) {
+
+
     const ownerId = this.owner;
     const productType = this.productType;
     const ownerType = this.ownerType.trim().toUpperCase(); // Ensure ownerType is uppercase
@@ -102,6 +108,14 @@ productSchema.pre("save", async function (next) {
       } else {
         return next(new Error("Admin not found for the provided owner ID"));
       }
+    }
+    // Initialize `offerPrice` as the same value as `price` for each variant
+    if (this.variants && this.variants.length > 0) {
+      this.variants.forEach((variant) => {
+        if (!variant.offerPrice) {
+          variant.offerPrice = variant.price; // Set offerPrice to price if it's not explicitly set
+        }
+      });
     }
 
     // Calculate the total stock from all variants
