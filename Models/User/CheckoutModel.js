@@ -23,8 +23,15 @@ const CheckoutSchema = new mongoose.Schema(
     coinDiscount: { type: Number, default: 0 }, // Discount value from coins
     ReducedDiscount: { type: Number, default: 0 }, // couponDiscount + coinDiscount
     finalTotal: { type: Number, required: true }, // Subtotal - Discounts (Coupon + Coins)
+    expiresAt: {
+      type: Date,
+      default: function () {
+        return new Date(Date.now() + 3 * 24 * 60 * 60 * 1000); // 3 days from creation
+      },
+      index: { expires: 0 }, // TTL index to delete automatically
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 CheckoutSchema.pre('save', async function (next) {
@@ -73,8 +80,8 @@ CheckoutSchema.pre('save', async function (next) {
 
     // Apply coin discount if coins are used
     if (this.coinsApplied > 0) {
-      const coinValue = 0.1; // Example: Each coin equals $0.1 discount
-      coinDiscount = this.coinsApplied * coinValue;
+      /* const coinValue = 0.1; */ // Example: Each coin equals $0.1 discount
+      coinDiscount = this.coinsApplied /* * coinValue; */
 
       // Ensure coin discount does not exceed subtotal
       if (coinDiscount > this.subtotal) coinDiscount = this.subtotal;
