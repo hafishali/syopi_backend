@@ -169,25 +169,28 @@ exports.getAvailableCoupons = async(req,res) => {
         const categoryIds = products.map(product => product.category);
         const subcategoryIds = products.map(product => product.subcategory);
         const ownerId = products.map(product => product.owner);
-        // const productNames = products.map(product => product.name);
 
-        const Coupons = await Coupon.find({
+        const coupons = await Coupon.find({
             $and: [
-            { applicableCategories: { $in: categoryIds } },
-            { applicableSubcategories: { $in: subcategoryIds } },
-            { applicableProducts: { $in: productIds } },
-            { createdBy: { $in: ownerId } },
-
+                { createdBy: { $in: ownerId } },
+                {
+                    $or: [
+                        { applicableCategories: { $in: categoryIds } },
+                        { applicableSubcategories: { $in: subcategoryIds } },
+                        { applicableProducts: { $in: productIds } },
+                    ],
+                },
             ],
-            status: 'active',
-            startDate: { $lte: new Date() },
-            endDate: { $gte: new Date() },
         });
+
+        if(!coupons || coupons.length === 0){
+            return res.status(404).json({ message: "No avaliable coupons" })
+        }
         
         return res.status(200).json({
             message: 'Available coupons fetched successfully',
-            total: Coupons.length,
-            Coupons,
+            total: coupons.length,
+            coupons,
         });
     } catch (error) {
         return res.status(500).json({ message: 'Internal Server Error', error:error.message });
