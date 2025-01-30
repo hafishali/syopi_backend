@@ -179,16 +179,26 @@ exports.getAvailableCoupons = async(req,res) => {
                     ],
                 },
             ],
+            status: 'active',
+            startDate: { $lte: new Date() },
+            endDate: { $gte: new Date() },
         });
 
         if(!coupons || coupons.length === 0){
             return res.status(404).json({ message: "No avaliable coupons" })
         }
+
+        // Convert startDate and endDate to standard date format (YYYY-MM-DD)
+        const formattedCoupons = coupons.map((coupon) => ({
+        ...coupon.toObject(), // Convert Mongoose document to plain JavaScript object
+        startDate: coupon.startDate.toISOString().split('T')[0].split('-').reverse().join('-'), // Format: YYYY-MM-DD
+        endDate: coupon.endDate.toISOString().split('T')[0].split('-').reverse().join('-'), // Format: YYYY-MM-DD
+        }));
         
         return res.status(200).json({
             message: 'Available coupons fetched successfully',
-            total: coupons.length,
-            coupons,
+            total: formattedCoupons.length,
+            coupons: formattedCoupons,
         });
     } catch (error) {
         return res.status(500).json({ message: 'Internal Server Error', error:error.message });
