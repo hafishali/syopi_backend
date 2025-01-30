@@ -19,5 +19,8 @@ router.post('/apply/coupon',verifyToken(['customer']),CheckoutController.applyCo
 //get available coupons
 router.get('/get/:checkoutId/coupons',CheckoutController.getAvailableCoupons);
 
+// apply syopi coins
+router.post('/apply/coin',verifyToken(['customer']),CheckoutController.applyCoins)
+
 
 module.exports=router

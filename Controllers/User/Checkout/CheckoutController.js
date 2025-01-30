@@ -1,6 +1,8 @@
 const Checkout = require('../../../Models/User/CheckoutModel')
 const Cart = require('../../../Models/User/cartModel')
 const Coupon = require('../../../Models/Admin/couponModel')
+const User=require('../../../Models/User/UserModel')
+const mongoose=require('mongoose')
 
 // create checkout
 exports.createCheckout = async (req, res) => {
@@ -191,3 +193,72 @@ exports.getAvailableCoupons = async(req,res) => {
         return res.status(500).json({ message: 'Internal Server Error', error:error.message });
     }
 }
+
+// apply coins
+exports.applyCoins = async (req, res) => {
+    const { checkoutId, coins } = req.body;
+    const userId = req.user.id;
+
+    try {
+        // Validate required fields
+        if (!userId || !checkoutId || !coins) {
+            return res.status(400).json({ message: 'User ID, Checkout ID, and Coins are required.' });
+        }
+
+        // Fetch the user
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        // Ensure the user has enough coins
+        if (user.coins < coins) {
+            return res.status(400).json({ message: 'Insufficient coins.' });
+        }
+
+        // Fetch the checkout document
+        const checkout = await Checkout.findById(checkoutId);
+        if (!checkout) {
+            return res.status(404).json({ message: 'Checkout not found.' });
+        }
+
+        // Check if the checkout belongs to the user
+        if (String(checkout.userId) !== userId) {
+            return res.status(403).json({ message: 'Unauthorized: Checkout does not belong to the user.' });
+        }
+
+        // Apply coins to checkout
+        checkout.coinsApplied = coins;
+
+        // Save checkout and deduct coins in a **transaction**
+        const session = await mongoose.startSession();
+        session.startTransaction();
+        try {
+            await checkout.save({ session });
+
+            // Deduct coins from user
+            user.coins -= coins;
+            await user.save({ session });
+
+            // Commit transaction
+            await session.commitTransaction();
+            session.endSession();
+
+            res.status(200).json({
+                message: 'Coins applied successfully.',
+                checkout,
+                remainingCoins: user.coins,
+            });
+        } catch (error) {
+            await session.abortTransaction();
+            session.endSession();
+            throw error;
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: 'Internal server error.',
+            error: error.message || error,
+        });
+    }
+};
