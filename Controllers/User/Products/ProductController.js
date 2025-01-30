@@ -3,7 +3,7 @@ const getProduct = require('../../../utils/getProducts');
 // get all products
 exports.getallProducts = async(req,res) => {
   try {
-    const { brand,productType,minPrice,maxPrice,size,newArrivals } = req.query;
+    const { brand,productType,minPrice,maxPrice,size,newArrivals,discountMin,discountMax } = req.query;
     let userId;
     if (req.user && req.user.id) {
       userId = req.user.id;
@@ -20,6 +20,10 @@ exports.getallProducts = async(req,res) => {
     // Calculate the date for new arrivals (last 2 days)
     const newArrivalDate = new Date();
     newArrivalDate.setDate(newArrivalDate.getDate() - 2);
+
+    // Parse discount range inputs
+    const discountMinValue = discountMin ? parseFloat(discountMin) : null;
+    const discountMaxValue = discountMax ? parseFloat(discountMax) : null;
 
     const filteredProducts = allProducts.filter((product) => {
       let isMatching = true;
@@ -60,6 +64,38 @@ exports.getallProducts = async(req,res) => {
         }
       }
 
+      // Filter by discount range (if product is part of an offer)
+      if ((discountMinValue || discountMaxValue) && product.offers && product.offers.length > 0) {
+        // Fetch the offer details (assuming offers are populated)
+        const offer = product.offers[0]; // Assuming the first offer is the active one
+      
+        let discountPercentage = 0;
+      
+        // Calculate discount percentage based on offer type
+        if (offer.offerType === "percentage") {
+          discountPercentage = offer.amount; // Percentage discount
+        } else if (offer.offerType === "fixed") {
+          // Calculate percentage discount for fixed amount
+          const firstVariant = product.variants[0];
+          if (firstVariant && firstVariant.price > 0) {
+            discountPercentage = (offer.amount / firstVariant.price) * 100;
+          }
+        } else if (offer.offerType === "buy_one_get_one" || offer.offerType === "free_shipping") {
+          // These offer types don't directly translate to a percentage discount
+          discountPercentage = 0; // You can adjust this logic as needed
+        }
+      
+        // Check if the discount percentage falls within the specified range
+        if (
+          (discountMinValue && discountPercentage < discountMinValue) ||
+          (discountMaxValue && discountPercentage > discountMaxValue)
+        ) {
+          isMatching = false;
+        }
+      } else {
+        isMatching = false;
+      }
+
       return isMatching;
     });
 
@@ -67,7 +103,7 @@ exports.getallProducts = async(req,res) => {
       return res.status(404).json({ message: "No products found matching the criteria" });
     }
 
-    res.status(200).json({ products: filteredProducts });
+    res.status(200).json({ total: filteredProducts.length, products: filteredProducts });
   } catch (error) {
     res.status(500).json({ message: "Error fetching prodcuts", error: error.message });
   }
