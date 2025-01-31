@@ -106,7 +106,11 @@ scheduleCouponCron();
 // Schedule the cron job to run every day at midnight
 cron.schedule("0 0 * * *", async () => {
     console.log("Running daily expired offers cleanup...");
-    await removeExpiredOffers();
+    try {
+      await removeExpiredOffers();
+    } catch (error) {
+      console.error("Error during expired offers cleanup:", error);
+    }
   });
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
