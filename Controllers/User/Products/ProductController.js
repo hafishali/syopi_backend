@@ -3,7 +3,7 @@ const getProduct = require('../../../utils/getProducts');
 // get all products
 exports.getallProducts = async(req,res) => {
   try {
-    const { brand,productType,minPrice,maxPrice,size,newArrivals,discountMin,discountMax } = req.query;
+    const { brand,productType,minPrice,maxPrice,size,newArrivals,discountMin,discountMax,sort } = req.query;
     let userId;
     if (req.user && req.user.id) {
       userId = req.user.id;
@@ -13,6 +13,10 @@ exports.getallProducts = async(req,res) => {
     if(!allProducts || allProducts.length === 0){
       return res.status(404).json({ message: "No products found" });
     }
+
+    // if (!brand && !productType && !minPrice && !maxPrice && !size && !newArrivals && !discountMin && !discountMax) {
+    //   return res.status(200).json({ total: allProducts.length, products: allProducts });
+    // }
 
     // Parse multiple size inputs if provided
     const sizesArray = size ? size.split(",") : null;
@@ -92,7 +96,7 @@ exports.getallProducts = async(req,res) => {
         ) {
           isMatching = false;
         }
-      } else {
+      } else if (discountMinValue || discountMaxValue) {
         isMatching = false;
       }
 
@@ -101,6 +105,22 @@ exports.getallProducts = async(req,res) => {
 
     if (!filteredProducts || filteredProducts.length === 0) {
       return res.status(404).json({ message: "No products found matching the criteria" });
+    }
+
+    // Sorting logic
+    if (sort) {
+      if (sort !== "asc" && sort !== "desc") {
+        return res.status(400).json({ message: 'Invalid sort parameter. Use "asc" or "desc"' });
+      }
+
+      const sortedProducts = filteredProducts.sort((a, b) => {
+        const offerPriceA = a.variants[0]?.offerPrice || 0; // Access offerPrice of the first variant
+        const offerPriceB = b.variants[0]?.offerPrice || 0; // Access offerPrice of the first variant
+
+        return sort === "asc" ? offerPriceA - offerPriceB : offerPriceB - offerPriceA;
+      });
+
+      return res.status(200).json({ total: sortedProducts.length, products: sortedProducts });
     }
 
     res.status(200).json({ total: filteredProducts.length, products: filteredProducts });
@@ -165,34 +185,34 @@ exports.getProductById = async (req, res) => {
     }
   };
 
-// sorting based on price
-exports.getSortedProducts = async (req, res) => {
-  try {
-    let userId;
-    if (req.user && req.user.id) {
-      userId = req.user.id;
-    }
-    const {sort} = req.query;
+// // sorting based on price
+// exports.getSortedProducts = async (req, res) => {
+//   try {
+//     let userId;
+//     if (req.user && req.user.id) {
+//       userId = req.user.id;
+//     }
+//     const {sort} = req.query;
 
-    // Validate the query parameters
-    if (sort && sort !== 'asc' && sort !== 'desc') {
-      return res.status(400).json({ message: 'Invalid sort parameter. Use "asc" or "desc".' });
-    }
+//     // Validate the query parameters
+//     if (sort && sort !== 'asc' && sort !== 'desc') {
+//       return res.status(400).json({ message: 'Invalid sort parameter. Use "asc" or "desc".' });
+//     }
 
-    const sortOrder = sort === 'asc' ? 1 : -1;
+//     const sortOrder = sort === 'asc' ? 1 : -1;
 
-    const products = await getProduct(userId); 
+//     const products = await getProduct(userId); 
 
-    // Sort the products based on the first variant's offerPrice
-    const sortedProducts = products.sort((a, b) => {
-      const offerPriceA = a.variants[0]?.offerPrice || 0; // Handle cases where variants might be missing
-      const offerPriceB = b.variants[0]?.offerPrice || 0;
+//     // Sort the products based on the first variant's offerPrice
+//     const sortedProducts = products.sort((a, b) => {
+//       const offerPriceA = a.variants[0]?.offerPrice || 0; // Handle cases where variants might be missing
+//       const offerPriceB = b.variants[0]?.offerPrice || 0;
 
-      return sortOrder === 1 ? offerPriceA - offerPriceB : offerPriceB - offerPriceA;
-    });
+//       return sortOrder === 1 ? offerPriceA - offerPriceB : offerPriceB - offerPriceA;
+//     });
 
-    res.status(200).json({ message: 'Products sorted successfully', products:sortedProducts });
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching sorted products', error: error.message });
-  }
-};
+//     res.status(200).json({ message: 'Products sorted successfully', products:sortedProducts });
+//   } catch (error) {
+//     res.status(500).json({ message: 'Error fetching sorted products', error: error.message });
+//   }
+// };
