@@ -1,21 +1,25 @@
 const express = require('express');
 const router = express.Router();
-const offerController = require('../../../Controllers/Vendor/Offer/OfferController');
-const verifyToken = require('../../../Middlewares/jwtConfig');
+const offerController = require('../../../Controllers/Admin/offer/offerController');
+const verifyAdminToken = require('../../../Middlewares/jwtConfig'); // Assuming middleware for checking admin role
 
-//create offer
-router.post('/create',verifyToken(['vendor']),offerController.createOffer);
+// Create Offer (Admin only)
+router.post('/create', verifyAdminToken(['vendor']), offerController.createOffer);
 
-// get all offer
-router.get('/get',verifyToken(['vendor']),offerController.getOffers);
+// Get All Offers
+router.get('/get', offerController.getOffers);
 
-// get offer by id
-router.get('/get/:id',verifyToken(['vendor']),offerController.getOfferById);
+// get an offer  by id
+router.get('/get/:id', offerController.getOfferById);
 
-// update offer
-router.patch('/update/:id',verifyToken(['vendor']),offerController.updateOffer);
+// Update Offer
+router.patch('/update/:id', verifyAdminToken(['vendor']), offerController.updateOffer);
 
-//delete offer
-router.delete('/delete/:id',verifyToken(['vendor']),offerController.deleteOffer);
+// Delete Offer
+router.delete('/delete/:id', verifyAdminToken(['vendor']), offerController.deleteOffer);
+
+//expire
+router.post("/trigger-cleanup", verifyAdminToken(['vendor']), offerController.triggerOfferCleanup)
 
 module.exports = router;
+ 

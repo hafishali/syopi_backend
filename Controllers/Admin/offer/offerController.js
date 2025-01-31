@@ -6,25 +6,22 @@ const SubCategory = require("../../../Models/Admin/SubCategoryModel")
 const mongoose = require('mongoose')
 const removeExpiredOffers = require("../../../utils/removeExpiredOffers")
 
+//apply offer
 const applyOfferToProducts = async (offer) => {
-  const { category, subcategory, products, ownerId, ownerType, offerType, amount, expireDate,_id: offerId, } = offer;
+  const { _id: offerId, category, subcategory, products, ownerId, ownerType, offerType, amount, expireDate } = offer;
 
-  // Validate offer status
+  // Validate offer status and expiry
   if (offer.status !== "active") throw new Error("Offer is not active.");
   if (new Date() > expireDate) throw new Error("Offer has expired.");
 
-
+  // Find applicable products
   const applicableProducts = await Product.find({
-    $and: [
-      {
-        $or: [
-          { _id: { $in: products } },
-          { category: { $in: category } },
-          { subcategory: { $in: subcategory } },
-        ],
-      },
-      { owner: ownerId },
-      { ownerType: ownerType },
+    owner: ownerId,
+    ownerType,
+    $or: [
+      { _id: { $in: products } }, // Specific products
+      { category: { $in: category } }, // Products in the specified category
+      { subcategory: { $in: subcategory } }, // Products in the specified subcategory
     ],
   });
 
@@ -32,15 +29,21 @@ const applyOfferToProducts = async (offer) => {
     throw new Error("No applicable products found for this offer.");
   }
 
+  // Apply the offer to each product
   for (const product of applicableProducts) {
-    // Apply the offer to each variant
+    // Remove any existing offer from the product
+    if (product.offers) {
+      const existingOffer = await Offer.findById(product.offers);
+      if (existingOffer) {
+        await removeOfferFromProducts(existingOffer, [product._id]);
+      }
+    }
+
     let minOfferPrice = Infinity;
 
+    // Apply the offer to each variant
     for (const variant of product.variants) {
-      if (!variant.price || variant.price <= 0) {
-        console.log(`Invalid price for variant with color: ${variant.color}. Skipping...`);
-        continue;
-      }
+      if (!variant.price || variant.price <= 0) continue;
 
       if (offerType === "percentage") {
         const discount = (variant.price * amount) / 100;
@@ -52,10 +55,9 @@ const applyOfferToProducts = async (offer) => {
       minOfferPrice = Math.min(minOfferPrice, variant.offerPrice);
     }
 
-    // Update the product with the new offer
+    // Update product's overall offer price and current offer
     product.offerPrice = minOfferPrice;
-    product.currentOffer = offerId; // Set the active offer
-
+    product.offers = offerId;
 
     await product.save();
   }
@@ -63,38 +65,51 @@ const applyOfferToProducts = async (offer) => {
   console.log(`Offer applied to ${applicableProducts.length} products.`);
 };
 
-const removeOfferFromProducts = async (offer) => {
-  const { _id: offerId, category, subcategory, products, ownerId, ownerType } = offer;
 
-  const applicableProducts = await Product.find({
-    $and: [
-      { $or: [{ _id: { $in: products } }, { category: { $in: category } }, { subcategory: { $in: subcategory } }] },
-      { owner: ownerId },
-      { ownerType },
-      { currentOffer: offerId }, // Only products with this specific offer applied
-    ],
-  });
+// remove offer
+const removeOfferFromProducts = async (offer, productIds = []) => {
+  const { _id: offerId, ownerId, ownerType } = offer;
 
+  // Find products with the current offer
+  const query = {
+    owner: ownerId,
+    ownerType,
+    offers: offerId,
+  };
+
+  // If specific product IDs are provided, only target those products
+  if (productIds.length > 0) {
+    query._id = { $in: productIds };
+  }
+
+  const applicableProducts = await Product.find(query);
+
+  // Reset offer prices for each product
   for (const product of applicableProducts) {
-    // Reset offer-related fields
-    product.currentOffer = null;
-    product.offerPrice = null; // Reset to original price
+    product.offers = null;
+
+    // Reset offer price to original price for all variants
     product.variants.forEach((variant) => {
-      variant.offerPrice = null;
+      variant.offerPrice = variant.price;
     });
+
+    // Update product's overall offer price to the lowest variant price
+    product.offerPrice = Math.min(...product.variants.map((v) => v.price));
 
     await product.save();
   }
 
-  console.log(`Offer removed from ${applicableProducts.length} products.`);
+  console.log(`Offer removed and prices reset for ${applicableProducts.length} products.`);
 };
+
 
 
 // Create Offer
 exports.createOffer = async (req, res) => {
   try {
     const { offerName, ownerId, offerType, amount, startDate, expireDate, category, subcategory, products } = req.body;
-  
+
+    // Validate offer amount
     if (!amount || amount <= 0) {
       return res.status(400).json({ message: "Invalid offer amount. It must be greater than 0." });
     }
@@ -102,50 +117,7 @@ exports.createOffer = async (req, res) => {
     const ownerType = req.user.role;
     const createdBy = req.user._id;
 
-    // Validate categories and ensure they belong to the creator
-    if (category) {
-      for (const catId of category) {
-        const hasMatchingProducts = await Product.exists({
-          category: catId,
-          owner: ownerId,
-          ownerType: ownerType,
-        });
-        if (!hasMatchingProducts) {
-          return res.status(400).json({
-            message: `Category ID ${catId} does not have any products owned by this vendor/admin.`,
-          });
-        }
-      }
-    }
-
-    // Validate subcategories and ensure they belong to the creator
-    if (subcategory) {
-      for (const subCatId of subcategory) {
-        const hasMatchingProducts = await Product.exists({
-          subcategory: subCatId,
-          owner: ownerId,
-          ownerType: ownerType,
-        });
-        if (!hasMatchingProducts) {
-          return res.status(400).json({
-            message: `Subcategory ID ${subCatId} does not have any products owned by this vendor/admin.`,
-          });
-        }
-      }
-    }
-
-     // Validate products and ensure they belong to the creator
-     if (products) {
-      for (const prodId of products) {
-        const existingProduct = await Product.findOne({ _id: prodId, owner: ownerId });
-        if (!existingProduct) {
-          return res.status(403).json({
-            message: `Product ID ${prodId} does not belong to the specified owner.`,
-          });
-        }
-      }
-    }
-
+    // Create the new offer
     const newOffer = new Offer({
       offerName,
       offerType,
@@ -171,21 +143,42 @@ exports.createOffer = async (req, res) => {
   }
 };
 
-// Get All Offers
+// Get All Offers with Filtering
 exports.getOffers = async (req, res) => {
   try {
-    const offers = await Offer.find()
+    const { ownerId, category, subcategory, status } = req.query; // Get filters from query params
+
+    let filter = {}; // Base filter object
+
+    if (ownerId) {
+      filter.ownerId = ownerId; // Filter by ownerId
+    }
+
+    if (category) {
+      filter.category = { $in: category.split(",") }; // Filter by multiple categories
+    }
+
+    if (subcategory) {
+      filter.subcategory = { $in: subcategory.split(",") }; // Filter by multiple subcategories
+    }
+
+    if (status) {
+      filter.status = status; // Filter by offer status (active, expired, etc.)
+    }
+
+    const offers = await Offer.find(filter)
       .populate("category", "name")
       .populate("subcategory", "name")
       .populate("products", "name")
       .populate("createdBy", "role")
-      .sort({ startDate: 1 }); // Sort by start date
+      .sort({ startDate: 1 });
 
     res.status(200).json({ offers });
   } catch (error) {
     res.status(500).json({ message: "Error fetching offers", error: error.message });
   }
 };
+
 
 // Get Offer by ID
 exports.getOfferById = async (req, res) => {
