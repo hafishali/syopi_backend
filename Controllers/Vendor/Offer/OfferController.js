@@ -253,7 +253,8 @@ exports.deleteOffer = async (req, res) => {
     
     // Remove the offer from all applicable products
     await removeOfferFromProducts(offer);
-    await offer.remove();
+    // Delete the offer from the database
+    await Offer.findByIdAndDelete(id);
 
     res.status(200).json({ message: "Offer deleted successfully." });
   } catch (error) {
