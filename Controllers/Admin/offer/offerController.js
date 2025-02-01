@@ -246,14 +246,15 @@ exports.deleteOffer = async (req, res) => {
     }
 
     // Ensure only the creator can delete the offer
-    if (String(offer.createdBy) !== String(req.user.id)) {
+    if (String(offer.ownerId) !== String(req.user.id)) {
       return res.status(403).json({ message: "You do not have permission to delete this offer." });
     }
 
     
     // Remove the offer from all applicable products
     await removeOfferFromProducts(offer);
-    await offer.remove();
+    // Delete the offer from the database
+    await Offer.findByIdAndDelete(id);
 
     res.status(200).json({ message: "Offer deleted successfully." });
   } catch (error) {
