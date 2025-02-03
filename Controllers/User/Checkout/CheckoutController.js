@@ -172,7 +172,7 @@ exports.getAvailableCoupons = async(req,res) => {
         // const productNames = products.map(product => product.name);
 
         const Coupons = await Coupon.find({
-            $and: [
+            $or: [
             { applicableCategories: { $in: categoryIds } },
             { applicableSubcategories: { $in: subcategoryIds } },
             { applicableProducts: { $in: productIds } },

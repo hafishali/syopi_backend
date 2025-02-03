@@ -17,7 +17,7 @@ router.delete('/delete/:checkoutId',verifyToken(['customer']),CheckoutController
 router.post('/apply/coupon',verifyToken(['customer']),CheckoutController.applyCoupon)
 
 //get available coupons
-router.get('/get/:checkoutId/coupons',CheckoutController.getAvailableCoupons);
+router.get('/get/:checkoutId/coupons',verifyToken(['customer']),CheckoutController.getAvailableCoupons);
 
 // apply syopi coins
 router.post('/apply/coin',verifyToken(['customer']),CheckoutController.applyCoins)
