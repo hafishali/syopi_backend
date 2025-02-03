@@ -23,6 +23,9 @@ const CheckoutSchema = new mongoose.Schema(
     coinDiscount: { type: Number, default: 0 }, // Discount value from coins
     ReducedDiscount: { type: Number, default: 0 }, // couponDiscount + coinDiscount
     finalTotal: { type: Number, required: true }, // Subtotal - Discounts (Coupon + Coins)
+    isProcessed:{
+      type: Boolean, default: false
+    },
     expiresAt: {
       type: Date,
       default: function () {

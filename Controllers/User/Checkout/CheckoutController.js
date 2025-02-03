@@ -170,6 +170,9 @@ exports.getAvailableCoupons = async(req,res) => {
         const subcategoryIds = products.map(product => product.subcategory);
         const ownerId = products.map(product => product.owner);
 
+
+
+
         const coupons = await Coupon.find({
             $and: [
                 { createdBy: { $in: ownerId } },
@@ -180,6 +183,7 @@ exports.getAvailableCoupons = async(req,res) => {
                         { applicableProducts: { $in: productIds } },
                     ],
                 },
+
             ],
             status: 'active',
             startDate: { $lte: new Date() },
