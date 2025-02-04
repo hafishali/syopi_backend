@@ -102,3 +102,18 @@ exports.deleteAddress = async (req, res) => {
       res.status(500).json({ error: error.message });
     }
   };
+
+exports.getDefaultAddress = async(req,res) => {
+  const userId = req.user.id;
+  try {
+    const address = await Address.find({ userId, defaultAddress: true });
+
+    if (!address || address.length === 0) {
+      return res.status(404).json({ message: "No deafult true addresses found for this user" });
+    }
+    
+    res.status(200).json(address);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching address", error: error.message });
+  }
+}
