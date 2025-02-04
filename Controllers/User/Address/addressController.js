@@ -106,7 +106,7 @@ exports.deleteAddress = async (req, res) => {
 exports.getDefaultAddress = async(req,res) => {
   const userId = req.user.id;
   try {
-    const address = await Address.find({ userId, defaultAddress: true });
+    const address = await Address.findOne({ userId, defaultAddress: true });
 
     if (!address || address.length === 0) {
       return res.status(404).json({ message: "No deafult true addresses found for this user" });
