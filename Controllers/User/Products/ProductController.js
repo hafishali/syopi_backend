@@ -183,8 +183,77 @@ exports.getProductById = async (req, res) => {
     } catch (err) {
       res.status(500).json({ message: "Error fetching product", error: err.message });
     }
-  };
+ 
+  
+// Get Similar Products
+exports.getSimilarProducts = async (req, res) => {
+  try {
+    const { id } = req.params; // Product ID from URL
+    let userId;
 
+    if (req.user && req.user.id) {
+      userId = req.user.id;
+    }
+
+    // Get all products
+    const allProducts = await getProduct(userId);
+
+    // Find the target product
+    const targetProduct = allProducts.find((product) => product._id.toString() === id);
+
+    if (!targetProduct) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    // Define price range tolerance (10% variation)
+    const priceTolerance = 0.1; // 10% price difference allowed
+    const minPrice = targetProduct.variants[0]?.offerPrice * (1 - priceTolerance);
+    const maxPrice = targetProduct.variants[0]?.offerPrice * (1 + priceTolerance);
+
+    // Filter similar products based on multiple attributes
+    const similarProducts = allProducts
+      .filter((product) => {
+        if (product._id.toString() === id) return false; // Exclude the original product
+
+        let matchScore = 0;
+
+        if (product.category === targetProduct.category) matchScore += 3; // Higher weight for category
+        if (product.brand === targetProduct.brand) matchScore += 2;
+        if (product.productType === targetProduct.productType) matchScore += 2;
+        if (product.color && targetProduct.color && product.color === targetProduct.color) matchScore += 2; // Color match
+        if (product.variants && product.variants.length > 0) {
+          const firstVariant = product.variants[0];
+          if (firstVariant.offerPrice >= minPrice && firstVariant.offerPrice <= maxPrice) matchScore += 1; // Price range match
+        }
+
+        return matchScore > 0;
+      })
+      .sort((a, b) => {
+        // Sort by highest match score
+        let scoreA = 0, scoreB = 0;
+
+        if (a.category === targetProduct.category) scoreA += 3;
+        if (b.category === targetProduct.category) scoreB += 3;
+        if (a.brand === targetProduct.brand) scoreA += 2;
+        if (b.brand === targetProduct.brand) scoreB += 2;
+        if (a.productType === targetProduct.productType) scoreA += 2;
+        if (b.productType === targetProduct.productType) scoreB += 2;
+        if (a.color === targetProduct.color) scoreA += 2;
+        if (b.color === targetProduct.color) scoreB += 2;
+
+        return scoreB - scoreA; // Higher score first
+      });
+
+    if (similarProducts.length === 0) {
+      return res.status(404).json({ message: "No similar products found" });
+    }
+
+    res.status(200).json({ products: similarProducts });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching similar products", error: error.message });
+  }
+};
+  
 // // sorting based on price
 // exports.getSortedProducts = async (req, res) => {
 //   try {
@@ -216,3 +285,4 @@ exports.getProductById = async (req, res) => {
 //     res.status(500).json({ message: 'Error fetching sorted products', error: error.message });
 //   }
 // };
+

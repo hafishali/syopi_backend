@@ -29,4 +29,10 @@ router.get('/google', passport.authenticate('google', { scope: ['profile', 'emai
 // google callback
 router.get('/google/callback', userController.googleLoginCallback);
 
+// Apple Login
+router.get("/apple", passport.authenticate("apple", { scope: ["name", "email"] }));
+
+// Apple Callback
+router.post("/apple/callback", userController.appleLoginCallback);
+
 module.exports = router;
