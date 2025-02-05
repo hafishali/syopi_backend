@@ -1,6 +1,8 @@
 const Checkout = require('../../../Models/User/CheckoutModel')
 const Cart = require('../../../Models/User/cartModel')
 const Coupon = require('../../../Models/Admin/couponModel')
+const User=require('../../../Models/User/UserModel')
+const mongoose=require('mongoose')
 
 // create checkout
 exports.createCheckout = async (req, res) => {
@@ -136,6 +138,139 @@ exports.applyCoupon = async (req, res) => {
             message: 'Coupon applied successfully.',
             checkout,
         });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: 'Internal server error.',
+            error: error.message || error,
+        });
+    }
+};
+
+// get available coupons
+exports.getAvailableCoupons = async(req,res) => {
+    const {checkoutId} = req.params;
+    try {
+        if (!checkoutId) {
+            return res.status(400).json({ message: 'Checkout ID is required' });
+        }
+
+        // Fetch checkout details
+        const checkout = await Checkout.findById(checkoutId).populate('items.productId');
+
+        if (!checkout) {
+            return res.status(404).json({ message: 'Checkout not found' });
+        }
+
+        const products = checkout.items.map((item) => item.productId);
+
+        // Extract product details
+        const productIds = products.map(product => product._id);
+        const categoryIds = products.map(product => product.category);
+        const subcategoryIds = products.map(product => product.subcategory);
+        const ownerId = products.map(product => product.owner);
+
+
+
+
+        const coupons = await Coupon.find({
+            $and: [
+                { createdBy: { $in: ownerId } },
+                {
+                    $or: [
+                        { applicableCategories: { $in: categoryIds } },
+                        { applicableSubcategories: { $in: subcategoryIds } },
+                        { applicableProducts: { $in: productIds } },
+                    ],
+                },
+
+            ],
+            status: 'active',
+            startDate: { $lte: new Date() },
+            endDate: { $gte: new Date() },
+        });
+
+        if(!coupons || coupons.length === 0){
+            return res.status(404).json({ message: "No avaliable coupons" })
+        }
+
+        // Convert startDate and endDate to standard date format (YYYY-MM-DD)
+        const formattedCoupons = coupons.map((coupon) => ({
+        ...coupon.toObject(), // Convert Mongoose document to plain JavaScript object
+        startDate: coupon.startDate.toISOString().split('T')[0].split('-').reverse().join('-'), // Format: YYYY-MM-DD
+        endDate: coupon.endDate.toISOString().split('T')[0].split('-').reverse().join('-'), // Format: YYYY-MM-DD
+        }));
+        
+        return res.status(200).json({
+            message: 'Available coupons fetched successfully',
+            total: formattedCoupons.length,
+            coupons: formattedCoupons,
+        });
+    } catch (error) {
+        return res.status(500).json({ message: 'Internal Server Error', error:error.message });
+    }
+}
+
+// apply coins
+exports.applyCoins = async (req, res) => {
+    const { checkoutId, coins } = req.body;
+    const userId = req.user.id;
+
+    try {
+        // Validate required fields
+        if (!userId || !checkoutId || !coins) {
+            return res.status(400).json({ message: 'User ID, Checkout ID, and Coins are required.' });
+        }
+
+        // Fetch the user
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        // Ensure the user has enough coins
+        if (user.coins < coins) {
+            return res.status(400).json({ message: 'Insufficient coins.' });
+        }
+
+        // Fetch the checkout document
+        const checkout = await Checkout.findById(checkoutId);
+        if (!checkout) {
+            return res.status(404).json({ message: 'Checkout not found.' });
+        }
+
+        // Check if the checkout belongs to the user
+        if (String(checkout.userId) !== userId) {
+            return res.status(403).json({ message: 'Unauthorized: Checkout does not belong to the user.' });
+        }
+
+        // Apply coins to checkout
+        checkout.coinsApplied = coins;
+
+        // Save checkout and deduct coins in a **transaction**
+        const session = await mongoose.startSession();
+        session.startTransaction();
+        try {
+            await checkout.save({ session });
+
+            // Deduct coins from user
+            user.coins -= coins;
+            await user.save({ session });
+
+            // Commit transaction
+            await session.commitTransaction();
+            session.endSession();
+
+            res.status(200).json({
+                message: 'Coins applied successfully.',
+                checkout,
+                remainingCoins: user.coins,
+            });
+        } catch (error) {
+            await session.abortTransaction();
+            session.endSession();
+            throw error;
+        }
     } catch (error) {
         console.error(error);
         res.status(500).json({

@@ -10,7 +10,7 @@ const getProduct = async (userId) => {
         }
 
         // Fetch products
-        const products = await Product.find();
+        const products = await Product.find().populate({ path: "offers", select: "offerType amount" });
 
         // Add `isWishlisted` flag if wishlist data is available
         const updatedProducts = products.map((product) => ({
