@@ -73,6 +73,7 @@ const userSchema = new mongoose.Schema(
       },
     },
     role: { type: String, default: 'customer' },
+    appleId: { type:String, default: "user"},
   },
   { timestamps: true }
 );

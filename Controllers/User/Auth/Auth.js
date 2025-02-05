@@ -250,3 +250,43 @@ exports.googleLoginCallback = (req, res, next) => {
       }
   })(req, res, next);
 };
+
+//apple login callback
+exports.appleLoginCallback = (req, res, next) => {
+  passport.authenticate("apple", { session: false }, async (err, user, info) => {
+    if (err) {
+      return res.status(500).json({ message: "Authentication failed", error: err.message });
+    }
+    try {
+      // Check if the user exists
+      let existingUser = await User.findOne({ appleId: user.appleId });
+
+      if (!existingUser) {
+        existingUser = await User.create({
+          name: user.name,
+          email: user.email,
+          appleId: user.appleId,
+        });
+      }
+
+      // Generate JWT token
+      const token = jwt.sign({ id: existingUser._id, role: existingUser.role }, process.env.JWT_SECRET, {
+        expiresIn: "1d",
+      });
+
+      res.status(200).json({
+        message: "Apple login successful",
+        token,
+        user: {
+          name: existingUser.name,
+          email: existingUser.email,
+          role: existingUser.role,
+          userId: existingUser._id,
+        },
+      });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: "Server error", error: error.message });
+    }
+  })(req, res, next);
+};
