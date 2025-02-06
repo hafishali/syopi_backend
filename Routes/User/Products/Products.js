@@ -18,5 +18,5 @@ router.get('/search',attachWishlistIfAuthenticated,productController.searchProdu
 // Get similar products
 router.get('/similar/:id', attachWishlistIfAuthenticated, productController.getSimilarProducts);
 
-
-module.exports=router 
+ 
+module.exports=router  
