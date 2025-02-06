@@ -20,8 +20,10 @@ router.get('/search',attachWishlistIfAuthenticated,productController.searchProdu
 router.get('/similar/:id', attachWishlistIfAuthenticated, productController.getSimilarProducts);
 
 
+
 // // sorting based on price
 // router.get('/sort',attachWishlistIfAuthenticated,productController.getSortedProducts);
 
 module.exports=router
+
 

@@ -183,6 +183,7 @@ exports.getProductById = async (req, res) => {
     } catch (err) {
       res.status(500).json({ message: "Error fetching product", error: err.message });
     }
+  }
  
   
 // Get Similar Products
