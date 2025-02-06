@@ -289,3 +289,30 @@ exports.deleteProduct = async (req, res) => {
     res.status(500).json({ message: "Error deleting product", error: err.message });
   }
 };
+
+// Delete a specific image by name
+exports.deleteProductImage = async (req, res) => {
+  try {
+    const { id } = req.params; 
+    const { imageName } = req.body;   
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+    const updatedImages = product.images.filter((img) => {
+      const imgFileName = img.split("\\").pop().split("/").pop(); 
+      return imgFileName !== imageName;
+    });
+    if (updatedImages.length === product.images.length) {
+      return res.status(400).json({ message: "Image not found in product" });
+    }
+    
+    const updatedProduct = await Product.findByIdAndUpdate(id,{ images: updatedImages },{ new: true });
+    if(!updatedProduct){
+      return res.status(404).json({ message: "Failed to delete image" })
+    }
+    res.status(200).json({ message: "Image deleted successfully", images: updatedProduct.images });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};

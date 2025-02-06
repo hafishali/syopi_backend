@@ -16,7 +16,11 @@ router.delete('/delete/:checkoutId',verifyToken(['customer']),CheckoutController
 // apply coupon
 router.post('/apply/coupon',verifyToken(['customer']),CheckoutController.applyCoupon)
 
+//get available coupons
+router.get('/get/:checkoutId/coupons',verifyToken(['customer']),CheckoutController.getAvailableCoupons);
 
+// apply syopi coins
+router.post('/apply/coin',verifyToken(['customer']),CheckoutController.applyCoins)
 
 
 module.exports=router

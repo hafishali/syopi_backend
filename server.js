@@ -50,6 +50,8 @@ const userAddressRoute = require('./Routes/User/Address/addressRoute');
 const adminProfileRoute = require('./Routes/Admin/Profile/profileRoute');
 const userProfileRoute = require('./Routes/User/Profile/profileRoute');
 const vendorProfileRoute = require('./Routes/Vendor/Profile/profileRoute');
+const userOrderRoute = require('./Routes/User/order/orderRoute');
+
 
 
 
@@ -98,6 +100,7 @@ app.use('/user/wishlist',userWishlistRoute)
 app.use('/user/address',userAddressRoute)
 app.use('/user/profile',userProfileRoute)
 app.use('/user/checkout',Checkout)
+app.use('/user/order',userOrderRoute)
 
 
 
