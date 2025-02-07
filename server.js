@@ -51,6 +51,7 @@ const adminProfileRoute = require('./Routes/Admin/Profile/profileRoute');
 const userProfileRoute = require('./Routes/User/Profile/profileRoute');
 const vendorProfileRoute = require('./Routes/Vendor/Profile/profileRoute');
 const userOrderRoute = require('./Routes/User/order/orderRoute');
+const userSliderRoute = require('./Routes/User/Slider/SliderRoute');
 
 
 
@@ -101,6 +102,7 @@ app.use('/user/address',userAddressRoute)
 app.use('/user/profile',userProfileRoute)
 app.use('/user/checkout',Checkout)
 app.use('/user/order',userOrderRoute)
+app.use('/user/slider',userSliderRoute)
 
 
 
