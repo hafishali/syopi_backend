@@ -130,9 +130,8 @@ orderSchema.pre('save', async function (next) {
       this.coupon = checkout.coupon;
 
       if (!this.finalPayableAmount || this.finalPayableAmount <= 0 || !this.totalPrice || this.totalPrice <= 0) {
-        // Throw a custom error message
         const error = new Error('Order validation failed: finalPayableAmount and totalPrice must be greater than 0');
-        error.name = 'ValidationError';  // Make it look like a Mongoose validation error
+        error.name = 'ValidationError';  
         throw error;
       }
 
