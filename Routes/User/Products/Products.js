@@ -13,7 +13,7 @@ router.get('/view',attachWishlistIfAuthenticated,productController.getallProduct
 router.get('/view/:id',attachWishlistIfAuthenticated,productController.getProductById)
 
 // search products 
-router.get('/search',attachWishlistIfAuthenticated,productController.searchProducts);
+// router.get('/search',attachWishlistIfAuthenticated,productController.searchProducts);
 
 
 // Get similar products

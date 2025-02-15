@@ -3,7 +3,7 @@ const getProduct = require('../../../utils/getProducts');
 // get all products
 exports.getallProducts = async(req,res) => {
   try {
-    const { brand,productType,minPrice,maxPrice,size,newArrivals,discountMin,discountMax,sort } = req.query;
+    const { brand,productType,minPrice,maxPrice,size,newArrivals,discountMin,discountMax,sort,search } = req.query;
     let userId;
     if (req.user && req.user.id) {
       userId = req.user.id;
@@ -28,6 +28,9 @@ exports.getallProducts = async(req,res) => {
     // Parse discount range inputs
     const discountMinValue = discountMin ? parseFloat(discountMin) : null;
     const discountMaxValue = discountMax ? parseFloat(discountMax) : null;
+
+    // Search query
+    const searchQuery = search ? search.trim().toLowerCase() : null;
 
     const filteredProducts = allProducts.filter((product) => {
       let isMatching = true;
@@ -100,6 +103,17 @@ exports.getallProducts = async(req,res) => {
         isMatching = false;
       }
 
+      // Filter by search query
+      if (searchQuery) {
+        const searchWords = searchQuery.split(" "); // Split the search query into words
+        const isMatch = searchWords.every((word) =>
+          product.name.toLowerCase().includes(word)
+        );
+        if (!isMatch) {
+          isMatching = false;
+        }
+      }
+
       return isMatching;
     });
 
@@ -129,39 +143,39 @@ exports.getallProducts = async(req,res) => {
   }
 }
 
-// search product
-exports.searchProducts = async(req,res) => {
-  try {
-    let userId;
-    if (req.user && req.user.id) {
-      userId = req.user.id;
-    }
-    const allProducts = await getProduct(userId);
+// // search product
+// exports.searchProducts = async(req,res) => {
+//   try {
+//     let userId;
+//     if (req.user && req.user.id) {
+//       userId = req.user.id;
+//     }
+//     const allProducts = await getProduct(userId);
 
-    if(!allProducts || allProducts.length === 0){
-      return res.status(404).json({ message: "No products found" });
-    }
+//     if(!allProducts || allProducts.length === 0){
+//       return res.status(404).json({ message: "No products found" });
+//     }
 
-    const {search} = req.query;
-    if(!search || !search.trim()){
-      return res.status(400).json({ message: "No search query found"})
-    }
-    const searchQuery = search.trim().toLowerCase();
+//     const {search} = req.query;
+//     if(!search || !search.trim()){
+//       return res.status(400).json({ message: "No search query found"})
+//     }
+//     const searchQuery = search.trim().toLowerCase();
 
-    const matchedProducts = allProducts.filter(product =>
-      product.name.toLowerCase().includes(searchQuery)
-    );
+//     const matchedProducts = allProducts.filter(product =>
+//       product.name.toLowerCase().includes(searchQuery)
+//     );
 
-    if (matchedProducts.length === 0) {
-      return res.status(404).json({ message: "Product not found" });
-    }
+//     if (matchedProducts.length === 0) {
+//       return res.status(404).json({ message: "Product not found" });
+//     }
 
-    res.status(200).json({ products: matchedProducts })
+//     res.status(200).json({ products: matchedProducts })
 
-  } catch (error) {
-    res.status(500).json({ message: "Error searching products", error: error.message});
-  }
-}
+//   } catch (error) {
+//     res.status(500).json({ message: "Error searching products", error: error.message});
+//   }
+// }
 
 // get product by id
 exports.getProductById = async (req, res) => {
