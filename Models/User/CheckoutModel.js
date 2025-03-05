@@ -12,18 +12,30 @@ const CheckoutSchema = new mongoose.Schema(
         productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
         quantity: { type: Number, required: true },
         price: { type: Number, required: true },
+        itemTotal: {
+          type: Number,
+          required: true
+        },
         color: { type: String },
         size: { type: String },
+        DiscountedPrice: { type: Number, default: 0 },
+        couponDiscountedValue: { type: Number, default: 0 },
+        coinDiscountedValue: { type: Number, default: 0 },
+        isCoupon: { type: Boolean, default: false },
       },
     ],
-    coupon: { type: mongoose.Schema.Types.ObjectId, ref: 'Coupon', default: null }, // Coupon reference
-    coinsApplied: { type: Number, default: 0 }, // Number of coins applied
-    subtotal: { type: Number, required: true }, // Calculated from cart total
-    couponDiscount: { type: Number, default: 0 }, // Discount applied from coupon
-    coinDiscount: { type: Number, default: 0 }, // Discount value from coins
-    ReducedDiscount: { type: Number, default: 0 }, // couponDiscount + coinDiscount
+    coupon: { type: mongoose.Schema.Types.ObjectId, ref: 'Coupon', default: null },
+    coinsApplied: { type: Number, default: 0 },
+    subtotal: { type: Number, required: true },
+    couponDiscount: { type: Number, default: 0 },
+    coinDiscount: { type: Number, default: 0 },
+    vendorCoinBreakdown: [{
+      vendorId: { type: mongoose.Schema.Types.ObjectId, ref: 'Vendor', required: true },
+      coinValue: { type: Number, default: 0 }
+    }],
+    ReducedDiscount: { type: Number, default: 0 },
     finalTotal: { type: Number, required: true }, // Subtotal - Discounts (Coupon + Coins)
-    isProcessed:{
+    isProcessed: {
       type: Boolean, default: false
     },
     expiresAt: {
@@ -39,75 +51,112 @@ const CheckoutSchema = new mongoose.Schema(
 
 CheckoutSchema.pre('save', async function (next) {
   try {
-      let couponDiscount = 0;
-      let discountPerProduct = 0;
+    let couponDiscount = 0;
+    let vendorCoinBreakdown = {};
+    
+    // Fetch the cart and populate product details
+    const cart = await Cart.findById(this.cartId).populate('items.productId', 'price owner');
+    if (!cart) throw new Error('Cart not found');
 
-      const cart = await Cart.findById(this.cartId).populate('items.productId');
-      if (!cart) return next(new Error('Cart not found'));
+    let newFinalTotal = this.subtotal;
+    let applicableProducts = [];
 
-      let newFinalTotal = this.subtotal;
-      let couponApplicableProducts = [];
+    // **Coupon Logic**
+    if (this.coupon) {
+      const coupon = await Coupon.findById(this.coupon);
+      if (!coupon) throw new Error('Coupon not found');
 
-      if (this.coupon) {
-          const coupon = await Coupon.findById(this.coupon);
-          if (coupon) {
-              const validation = await validateCouponLogic(coupon, { items: cart.items });
+      const validation = await validateCouponLogic(coupon, { items: cart.items });
+      if (!validation.valid) throw new Error(validation.errors.join(', '));
 
-              if (validation.valid) {
-                  couponApplicableProducts = cart.items.filter(
-                      (item) => item.productId.owner.toString() === coupon.createdBy.toString()
-                  );
+      applicableProducts = validation.applicableProducts;
+      
+      // Calculate total price of applicable items
+      const totalApplicablePrice = applicableProducts.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-                  let totalApplicablePrice = couponApplicableProducts.reduce(
-                      (sum, item) => sum + item.productId.price * item.quantity, 0
-                  );
-
-                  if (couponApplicableProducts.length > 0) {
-                      if (coupon.type === 'percentage') {
-                          let totalDiscount = (totalApplicablePrice * coupon.value) / 100;
-                          discountPerProduct = totalDiscount / totalApplicablePrice;
-                      } else if (coupon.type === 'flat') {
-                          discountPerProduct = Math.floor(coupon.value / totalApplicablePrice);
-                      }
-                      couponDiscount = discountPerProduct * totalApplicablePrice;
-                  } else {
-                      return next(new Error('No matching products found for this coupon.'));
-                  }
-              } else {
-                  return next(new Error(`Coupon validation failed: ${validation.errors.join(', ')}`));
-              }
-          } else {
-              return next(new Error('Coupon not found.'));
-          }
+      // Compute coupon discount
+      if (coupon.type === 'percentage') {
+        couponDiscount = (totalApplicablePrice * coupon.value) / 100;
+      } else if (coupon.type === 'flat') {
+        couponDiscount = coupon.value;
       }
 
+      // Spread discount across applicable items
+      const discountPerProduct = applicableProducts.length ? couponDiscount / applicableProducts.length : 0;
+
       this.items = cart.items.map((item) => {
-          let discountedPrice = item.productId.price;
+        const isApplicable = applicableProducts.some(p => p.productId.toString() === item.productId._id.toString());
+        return {
+          productId: item.productId._id,
+          quantity: item.quantity,
+          color: item.color,
+          size: item.size,
+          price: item.price,
+          itemTotal: item.price * item.quantity,
+          discountedPrice: isApplicable ? Math.max(item.price - discountPerProduct, 0) : item.price,
+          couponDiscountedValue: isApplicable ? discountPerProduct : 0,
+          isCoupon: isApplicable,
+        };
+      });
+    } else {
+      // No coupon: Maintain default item prices
+      this.items = cart.items.map((item) => ({
+        productId: item.productId._id,
+        quantity: item.quantity,
+        color: item.color,
+        size: item.size,
+        price: item.price,
+        itemTotal: item.price * item.quantity,
+        discountedPrice: item.price,
+        couponDiscountedValue: 0,
+        isCoupon: false,
+      }));
+    }
 
-          if (couponApplicableProducts.some((p) => p.productId._id.toString() === item.productId._id.toString())) {
-              let productCouponDiscount = Math.min(item.productId.price, discountPerProduct);
-              discountedPrice -= productCouponDiscount;
-          }
+    // **Coin Discount Logic**
+    if (this.coinsApplied > 0) {
+      let coinDiscount = Math.round(this.coinsApplied);
+      let vendorCoinBreakdown = {};
 
-          return {
-              productId: item.productId._id,
-              quantity: item.quantity,
-              price: discountedPrice,
-              color: item.color,
-              size: item.size,
-          };
+      const totalItemPrice = this.items.reduce((sum, item) => sum + item.itemTotal, 0);
+
+      this.items = this.items.map((item) => {
+        const vendorId = cart.items.find(
+          cartItem => cartItem.productId._id.toString() === item.productId.toString()
+        ).productId.owner.toString();
+
+        const itemCoinDiscount = Math.round((item.itemTotal / totalItemPrice) * coinDiscount);
+
+        const discountedPrice = Math.max(0, Math.round(item.price - (itemCoinDiscount / item.quantity)));
+
+        if (!vendorCoinBreakdown[vendorId]) {
+          vendorCoinBreakdown[vendorId] = 0;
+        }
+        vendorCoinBreakdown[vendorId] += itemCoinDiscount;
+
+        return {
+          ...item,
+          coinDiscountedValue: itemCoinDiscount,
+          discountedPrice: discountedPrice
+        };
       });
 
-      this.couponDiscount = couponDiscount;
-      this.finalTotal = Math.max(this.subtotal - this.couponDiscount, 0);
+      this.vendorCoinBreakdown = Object.entries(vendorCoinBreakdown).map(([vendorId, coinValue]) => ({
+        vendorId: new mongoose.Types.ObjectId(vendorId),
+        coinValue: Math.round(coinValue)
+      }));
 
-      next();
+      this.coinDiscount = coinDiscount;
+      this.finalTotal = Math.max(0, Math.round(this.subtotal - this.couponDiscount - this.coinDiscount));
+    } else {
+      this.coinDiscount = 0;
+      this.vendorCoinBreakdown = [];
+      this.finalTotal = Math.max(0, Math.round(this.subtotal - this.couponDiscount));
+    }
+    next();
   } catch (error) {
-      next(error);
+    next(error);
   }
 });
-
-
-
 
 module.exports = mongoose.model('Checkout', CheckoutSchema);
