@@ -153,6 +153,8 @@ CheckoutSchema.pre('save', async function (next) {
       this.vendorCoinBreakdown = [];
       this.finalTotal = Math.max(0, Math.round(this.subtotal - this.couponDiscount));
     }
+
+    this.ReducedDiscount=this.couponDiscount + this.coinDiscount
     next();
   } catch (error) {
     next(error);

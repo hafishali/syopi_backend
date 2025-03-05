@@ -20,25 +20,25 @@ const orderSchema = new mongoose.Schema({
     ref: 'Address', 
     required: true 
   },
-  products: [{
-    productId: { 
-      type: mongoose.Schema.Types.ObjectId, 
-      ref: 'Product', 
-      required: true 
-    },
-    quantity: { 
-      type: Number, 
-      required: true,
-      min: [1, 'Quantity cannot be less than 1']
-    },
-    price: { 
-      type: Number, 
-      required: true,
-      min: [0, 'Price cannot be negative']
-    },
-    color: { type: String, required: true },
-    size: { type: String, required: true },
-  }],
+  // products: [{
+  //   productId: { 
+  //     type: mongoose.Schema.Types.ObjectId, 
+  //     ref: 'Product', 
+  //     required: true 
+  //   },
+  //   quantity: { 
+  //     type: Number, 
+  //     required: true,
+  //     min: [1, 'Quantity cannot be less than 1']
+  //   },
+  //   price: { 
+  //     type: Number, 
+  //     required: true,
+  //     min: [0, 'Price cannot be negative']
+  //   },
+  //   color: { type: String, required: true },
+  //   size: { type: String, required: true },
+  // }],
   totalPrice: { 
     type: Number, 
     // required: true,
@@ -115,13 +115,13 @@ orderSchema.pre('save', async function (next) {
         throw new Error('Checkout items are missing');
       }
 
-      this.products = checkout.items.map(item => ({
-        productId: item.productId,
-        quantity: item.quantity,
-        price: item.price,
-        color: item.color,
-        size: item.size
-      }));
+      // this.products = checkout.items.map(item => ({
+      //   productId: item.productId,
+      //   quantity: item.quantity,
+      //   price: item.price,
+      //   color: item.color,
+      //   size: item.size
+      // }));
 
       this.totalPrice = checkout.subtotal || 0;
       this.discountedAmount = checkout.ReducedDiscount || 0;
