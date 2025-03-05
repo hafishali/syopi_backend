@@ -10,7 +10,7 @@ app.use(cors())
 app.use(express.json())
 
 const removeExpiredOffers = require("./utils/removeExpiredOffers")
-const { scheduleCouponCron } = require('./utils/cronTasks')
+const { scheduleCouponCron ,schedulePayoutCron} = require('./utils/cronTasks')
 require('./Configs/passportConfigGoogle')
 
 const tokenRefresh=require('./Routes/RefreshToken/RefreshRoute')
@@ -107,6 +107,8 @@ app.use('/user/slider',userSliderRoute)
 
 
 scheduleCouponCron();
+schedulePayoutCron();
+
 
 // Schedule the cron job to run every day at midnight
 cron.schedule("0 0 * * *", async () => {
