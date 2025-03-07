@@ -27,10 +27,10 @@ const CartSchema = new mongoose.Schema({
       type: String,
       required: [true, "Size is required"]
     },
-    itemTotal:{
-      type: Number,
-      required: [true, "product total price is required"]
-    }
+    // itemTotal:{
+    //   type: Number,
+    //   required: [true, "product total price is required"]
+    // }
 
   }],
  /*  coupon: {
@@ -78,7 +78,7 @@ CartSchema.pre('save', async function (next) {
       // Always set the price for the item to ensure correctness
       item.price = variant.offerPrice;
 
-      item.itemTotal=variant.offerPrice*item.quantity
+      // item.itemTotal=variant.offerPrice*item.quantity
 
       // Calculate subtotal for this item
       subtotal += item.price * item.quantity;
