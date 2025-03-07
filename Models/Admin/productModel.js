@@ -13,7 +13,8 @@ const productSchema = new mongoose.Schema({
   brand: { type: String, required: true },
   variants: [
     { 
-      color: { type: String, required: true }, // Example: "Blue"
+      color: { type: String, required: true },
+      colorName: { type: String, required: true }, // Example: "Blue"
       price: { type: Number, required: true }, // Example: 600
       wholesalePrice: { type: Number, required: true }, // Example: 500
       offerPrice: { type: Number, default: null }, 

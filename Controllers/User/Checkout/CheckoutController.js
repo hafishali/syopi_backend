@@ -50,7 +50,7 @@ exports.getCheckout = async (req, res) => {
         }
 
         // Find the checkout and ensure it belongs to the logged-in user
-        const userCheckout = await Checkout.findById(checkoutId).populate('items.productId', 'name images category');
+        const userCheckout = await Checkout.findById(checkoutId).populate('items.productId', 'name images category').populate('coupon')
         console.log(userCheckout)
 
         if (!userCheckout) {
