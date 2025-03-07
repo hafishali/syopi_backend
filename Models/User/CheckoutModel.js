@@ -70,6 +70,7 @@ CheckoutSchema.pre('save', async function (next) {
       if (!validation.valid) throw new Error(validation.errors.join(', '));
 
       applicableProducts = validation.applicableProducts;
+      console.log(applicableProducts)
       
       // Calculate total price of applicable items
       const totalApplicablePrice = applicableProducts.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -83,6 +84,7 @@ CheckoutSchema.pre('save', async function (next) {
 
       // Spread discount across applicable items
       const discountPerProduct = applicableProducts.length ? couponDiscount / applicableProducts.length : 0;
+      this.couponDiscount=couponDiscount
 
       this.items = cart.items.map((item) => {
         const isApplicable = applicableProducts.some(p => p.productId.toString() === item.productId._id.toString());

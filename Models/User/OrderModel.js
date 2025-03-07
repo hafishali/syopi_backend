@@ -52,7 +52,7 @@ const orderSchema = new mongoose.Schema({
     type: String,
     required: true,
     enum: {
-      values: ['Cash on Delivery', 'Credit Card', 'RazorPay', 'Net Banking'],
+      values: ['Cash on Delivery', 'Card', 'UPI', 'Net Banking'],
       message: 'Invalid payment method'
     }
   },
