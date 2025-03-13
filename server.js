@@ -53,7 +53,7 @@ const vendorProfileRoute = require('./Routes/Vendor/Profile/profileRoute');
 const userOrderRoute = require('./Routes/User/order/orderRoute');
 const userSliderRoute = require('./Routes/User/Slider/SliderRoute');
 
-
+const homeRoute = require('./Routes/User/Home/HomeRoute')
 
 
 
@@ -103,8 +103,10 @@ app.use('/user/profile',userProfileRoute)
 app.use('/user/checkout',Checkout)
 app.use('/user/order',userOrderRoute)
 app.use('/user/slider',userSliderRoute)
+app.use('/user/home', homeRoute)
 
-
+//Landing page
+app.use('/home', homeRoute)
 
 scheduleCouponCron();
 schedulePayoutCron();
