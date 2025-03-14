@@ -1,4 +1,6 @@
 const getProduct = require('../../../utils/getProducts');
+const Slider = require('../../../Models/Admin/SliderModel');
+const Banner = require('../../../Models/Admin/BannerModel')
 
 // get all products
 exports.getallProducts = async(req,res) => {
@@ -354,15 +356,17 @@ exports.getHomePage = async (req, res) => {
   })
   .slice(0, 5); // Get top 5 best offer products
 
-console.log("Best Offer Products:", bestOfferProducts);
-
+   
+  const activeSliders = await Slider.find({isActive:true})
+  const activeBanners = await Banner.find({isActive:true})
 
     res.status(200).json({
-      total: topProducts.length,
       products: topProducts,
       featured: bestOfferProducts, // Featured products
       affordable: affordableProducts, // Products under ₹1000
       lowToHigh: lowToHighProducts, // Sorted by price (low to high)
+      sliders: activeSliders, 
+      banner:activeBanners
     });
   } catch (error) {
     res.status(500).json({ message: "Error fetching homepage products", error: error.message });
