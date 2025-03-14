@@ -19,7 +19,6 @@ exports.registerUser = async (req, res) => {
       if (existingUser) {
         return res.status(400).json({ msg: 'Phone number already exists' });
       }
-
       const otp = otpGenerator.generate(6, { digits: true, upperCaseAlphabets: false, specialChars: false });
 
       cache.set(phone, { name,phone,email,referredBy,password,otp });
@@ -101,7 +100,7 @@ exports.verifyOTP = async(req,res) => {
 // Login User
 exports.loginUser = async (req, res) => {
     const { emailOrPhone, password } = req.body;
-  
+  console.log(emailOrPhone,password)
     try {
       const user = await User.findOne({ $or: [{ email: emailOrPhone }, { phone: emailOrPhone }] });
       if (!user) {
