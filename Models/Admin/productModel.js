@@ -50,6 +50,7 @@ const productSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Offer',
     default: null,
+  }
   }],
   coupon: { type: Number },
   status: { type: String, enum: ["approved", "pending", "rejected"], default: "pending" },
