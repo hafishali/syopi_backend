@@ -42,16 +42,12 @@ const productSchema = new mongoose.Schema({
   ownerType: { type: String, required: true },
   supplierName: { type: String },
   totalStock: { type: Number, default: 0 },
-
-  offers: [{
   totalSales: { type: Number, default: 0 }, // Track total sales for the product
   offers: {
-
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Offer',
     default: null,
-  }
-  }],
+  },
   coupon: { type: Number },
   status: { type: String, enum: ["approved", "pending", "rejected"], default: "pending" },
 }, { timestamps: true });
