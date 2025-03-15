@@ -20,25 +20,25 @@ const orderSchema = new mongoose.Schema({
     ref: 'Address', 
     required: true 
   },
-  // products: [{
-  //   productId: { 
-  //     type: mongoose.Schema.Types.ObjectId, 
-  //     ref: 'Product', 
-  //     required: true 
-  //   },
-  //   quantity: { 
-  //     type: Number, 
-  //     required: true,
-  //     min: [1, 'Quantity cannot be less than 1']
-  //   },
-  //   price: { 
-  //     type: Number, 
-  //     required: true,
-  //     min: [0, 'Price cannot be negative']
-  //   },
-  //   color: { type: String, required: true },
-  //   size: { type: String, required: true },
-  // }],
+  products: [{
+    productId: { 
+      type: mongoose.Schema.Types.ObjectId, 
+      ref: 'Product', 
+      required: true 
+    },
+    quantity: { 
+      type: Number, 
+      required: true,
+      min: [1, 'Quantity cannot be less than 1']
+    },
+    price: { 
+      type: Number, 
+      required: true,
+      min: [0, 'Price cannot be negative']
+    },
+    color: { type: String, required: true },
+    size: { type: String, required: true },
+  }],
   totalPrice: { 
     type: Number, 
     // required: true,
@@ -52,7 +52,7 @@ const orderSchema = new mongoose.Schema({
     type: String,
     required: true,
     enum: {
-      values: ['Cash on Delivery', 'Card', 'UPI', 'Net Banking'],
+      values: ['Cash on Delivery', 'Card', 'UPI', 'Net Banking','RazorPay'],
       message: 'Invalid payment method'
     }
   },
@@ -101,7 +101,8 @@ orderSchema.pre('save', async function (next) {
         .populate('items.productId')
         .lean();
         
-      console.log(checkout);
+        console.log('Checkout Items:', checkout.items);
+
       
       if (!checkout) {
         throw new Error('Associated checkout not found');
@@ -115,13 +116,13 @@ orderSchema.pre('save', async function (next) {
         throw new Error('Checkout items are missing');
       }
 
-      // this.products = checkout.items.map(item => ({
-      //   productId: item.productId,
-      //   quantity: item.quantity,
-      //   price: item.price,
-      //   color: item.color,
-      //   size: item.size
-      // }));
+      this.products = checkout.items.map(item => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        price: item.price,
+        color: item.color,
+        size: item.size
+      }));
 
       this.totalPrice = checkout.subtotal || 0;
       this.discountedAmount = checkout.ReducedDiscount || 0;

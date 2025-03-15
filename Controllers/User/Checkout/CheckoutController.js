@@ -3,10 +3,12 @@ const Cart = require('../../../Models/User/cartModel')
 const Coupon = require('../../../Models/Admin/couponModel')
 const User=require('../../../Models/User/UserModel')
 const mongoose=require('mongoose')
+const CoinSettings = require("../../../Models/Admin/CoinModel");
 
 // create checkout
 exports.createCheckout = async (req, res) => {
     const { cartId } = req.body;
+    console.log(cartId)
     const userId=req.user.id
     try {
         if (!userId || !cartId) {
@@ -222,6 +224,8 @@ exports.applyCoins = async (req, res) => {
             return res.status(400).json({ message: 'User ID, Checkout ID, and Coins are required.' });
         }
 
+       
+
         // Fetch the user
         const user = await User.findById(userId);
         if (!user) {
@@ -238,6 +242,12 @@ exports.applyCoins = async (req, res) => {
         if (!checkout) {
             return res.status(404).json({ message: 'Checkout not found.' });
         }
+         //fetch the coin details
+         const coin=await CoinSettings.findOne()
+         if(checkout.subtotal<coin.minAmount){
+            return res.status(400).json({ message: `Coins can only be applied for orders above ₹${coin.minAmount}.` });
+
+         }
 
         // Check if the checkout belongs to the user
         if (String(checkout.userId) !== userId) {

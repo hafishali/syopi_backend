@@ -5,9 +5,9 @@ const Product=require('../../../Models/Admin/productModel')
 
 // create cart or add new product to cart
 exports.createOrUpdateCart = async (req, res) => {
-  const { userId, productId, quantity, color, size } = req.body;
+  const { userId, productId, quantity, color,colorName, size } = req.body;
 
-  if (!userId || !productId || !quantity || !color || !size) {
+  if (!userId || !productId || !quantity || !color || !size || !colorName) {
     return res.status(400).json({ success: false, message: 'Missing required fields' });
   }
 
@@ -58,6 +58,7 @@ exports.createOrUpdateCart = async (req, res) => {
         productId,
         quantity,
         color,
+        colorName, 
         size,
        
       });

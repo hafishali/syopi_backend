@@ -52,7 +52,9 @@ const userProfileRoute = require('./Routes/User/Profile/profileRoute');
 const vendorProfileRoute = require('./Routes/Vendor/Profile/profileRoute');
 const userOrderRoute = require('./Routes/User/order/orderRoute');
 const userSliderRoute = require('./Routes/User/Slider/SliderRoute');
+const adminCoinRoute = require('./Routes/Admin/Coin/CoinRoute')
 const adminBannerRoute = require('./Routes/Admin/Banner/BannerRoute')
+
 
 const homeRoute = require('./Routes/User/Home/HomeRoute')
 
@@ -74,7 +76,11 @@ app.use('/admin/offer', offerRoutes)
 app.use('/admin/product', adminProductRoute) 
 app.use('/admin/wishlist', adminWishlistRoute)
 app.use('/admin/profile', adminProfileRoute)
+
+app.use('/admin/coin',adminCoinRoute)
+
 app.use('/admin/banner', adminBannerRoute)
+
 
 
 // vendor
