@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Coupon = require('../../Models/Admin/couponModel');
 const Cart = require('../../Models/User/cartModel');
+const User=require('../../Models/User/UserModel')
 const validateCouponLogic = require('../../utils/validateCoupon'); // Import validateCouponLogic function
 
 const CheckoutSchema = new mongoose.Schema(
@@ -165,5 +166,44 @@ CheckoutSchema.pre('save', async function (next) {
     next(error);
   }
 });
+
+
+
+// coin restoration
+CheckoutSchema.post('findOneAndDelete', async function (doc) {
+  console.log("sadf")
+  if (!doc || doc.isProcessed) return; 
+
+  try {
+      await User.findByIdAndUpdate(doc.userId, { $inc: { coins: doc.coinsApplied } });
+      console.log(`Restored ${doc.coinsApplied} coins to User ${doc.userId}`);
+  } catch (error) {
+      console.error('Error restoring coins:', error);
+  }
+});
+
+CheckoutSchema.post('deleteMany', async function (result) {
+  if (result.deletedCount === 0) return; 
+
+  try {
+      const deletedDocs = await this.model.find(result); 
+      const updates = deletedDocs
+          .filter(doc => !doc.isProcessed) 
+          .map(doc => ({
+              updateOne: {
+                  filter: { _id: doc.userId },
+                  update: { $inc: { coins: doc.coinsApplied } }
+              }
+          }));
+
+      if (updates.length) {
+          await User.bulkWrite(updates);
+          console.log(`${updates.length} users had their coins restored.`);
+      }
+  } catch (error) {
+      console.error('Error restoring coins after deleteMany:', error);
+  }
+});
+
 
 module.exports = mongoose.model('Checkout', CheckoutSchema);

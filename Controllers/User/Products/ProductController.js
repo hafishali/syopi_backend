@@ -1,4 +1,6 @@
 const getProduct = require('../../../utils/getProducts');
+const Slider = require('../../../Models/Admin/SliderModel');
+const Banner = require('../../../Models/Admin/BannerModel')
 
 // get all products
 exports.getallProducts = async(req,res) => {
@@ -300,4 +302,75 @@ exports.getSimilarProducts = async (req, res) => {
 //     res.status(500).json({ message: 'Error fetching sorted products', error: error.message });
 //   }
 // };
+
+// Get home pages 
+
+exports.getHomePage = async (req, res) => {
+  try {
+    let userId;
+    if (req.user && req.user.id) {
+      userId = req.user.id;
+    }
+
+    // Fetch all products (ensure salesCount and price fields are included)
+    const allProducts = await getProduct(userId);
+
+    if (!allProducts || allProducts.length === 0) {
+      return res.status(404).json({ message: "No products found" });
+    }
+
+    // Sort products based on salesCount (highest to lowest)
+    const sortedProducts = allProducts
+      .filter(product => product.salesCount && product.salesCount > 0)
+      .sort((a, b) => b.salesCount - a.salesCount);
+
+    // Limit results (default to top 10)
+    const limit = req.query.limit ? parseInt(req.query.limit) : 10;
+    const topProducts = sortedProducts.slice(0, limit);
+
+    // Section: Products under ₹1000
+    const affordableProducts = allProducts
+   .filter(product => 
+    product.variants.some(variant => 
+      Number(variant.offerPrice ?? variant.price) < 1000 // Check offerPrice first, fallback to price
+    )
+  )
+  .slice(0, 10);
+    
+    // Section: Products sorted from lowest price to highest
+    const lowToHighProducts = [...allProducts]
+      .sort((a, b) => a.price - b.price) // Sort by price ascending
+      .slice(0, 10); // Limit to 10 products
+
+    // Fetch featured products (incredible delights)
+    const bestOfferProducts = allProducts
+  .filter(product => 
+    product.variants.some(variant => 
+      variant.offerPrice !== null && variant.offerPrice < variant.price // Ensure offerPrice is lower
+    )
+  )
+  .sort((a, b) => { 
+    const maxDiscountA = Math.max(...a.variants.map(v => v.price - (v.offerPrice ?? v.price)));
+    const maxDiscountB = Math.max(...b.variants.map(v => v.price - (v.offerPrice ?? v.price)));
+    return maxDiscountB - maxDiscountA; // Sort by highest discount
+  })
+  .slice(0, 5); // Get top 5 best offer products
+
+   
+  const activeSliders = await Slider.find({isActive:true})
+  const activeBanners = await Banner.find({isActive:true})
+
+    res.status(200).json({
+      products: topProducts,
+      featured: bestOfferProducts, // Featured products
+      affordable: affordableProducts, // Products under ₹1000
+      lowToHigh: lowToHighProducts, // Sorted by price (low to high)
+      sliders: activeSliders, 
+      banner:activeBanners
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching homepage products", error: error.message });
+  }
+};
+
 
