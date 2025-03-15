@@ -62,6 +62,16 @@ exports.placeOrder = async (req, res) => {
             // Reduce stock
             sizeData.stock -= item.quantity;
 
+            
+            // Increment sales count for the size
+            sizeData.salesCount += item.quantity;
+
+            // Increment sales count for the variant
+            variant.salesCount += item.quantity;
+
+            // Update total sales count at the product level
+            product.totalSales += item.quantity;
+
             // Update total stock count
             product.totalStock = product.variants.reduce((sum, v) => 
                 sum + v.sizes.reduce((sizeSum, s) => sizeSum + s.stock, 0), 0
