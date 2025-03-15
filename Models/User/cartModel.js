@@ -27,6 +27,10 @@ const CartSchema = new mongoose.Schema({
       type: String,
       required: [true, "Size is required"]
     },
+    colorName:{
+      type:String,
+      required: [true, "colorName is required"]
+    },
     // itemTotal:{
     //   type: Number,
     //   required: [true, "product total price is required"]
