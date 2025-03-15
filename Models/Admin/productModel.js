@@ -18,10 +18,12 @@ const productSchema = new mongoose.Schema({
       price: { type: Number, required: true }, // Example: 600
       wholesalePrice: { type: Number, required: true }, // Example: 500
       offerPrice: { type: Number, default: null }, 
+      salesCount: { type: Number, default: 0 }, // Track sales per variant
       sizes: [
         {
           size: { type: String, required: true }, // Example: "L", "M"
           stock: { type: Number, default: 0, required: true }, // Stock for this size
+          salesCount: { type: Number, default: 0 }, // Track sales per size
         },
       ],
     },
@@ -40,6 +42,7 @@ const productSchema = new mongoose.Schema({
   ownerType: { type: String, required: true },
   supplierName: { type: String },
   totalStock: { type: Number, default: 0 },
+  totalSales: { type: Number, default: 0 }, // Track total sales for the product
   offers: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Offer',
@@ -48,6 +51,7 @@ const productSchema = new mongoose.Schema({
   coupon: { type: Number },
   status: { type: String, enum: ["approved", "pending", "rejected"], default: "pending" },
 }, { timestamps: true });
+
 
 // Pre-save hook to generate product code, populate supplierName, and calculate total stock
 productSchema.pre("save", async function (next) {
